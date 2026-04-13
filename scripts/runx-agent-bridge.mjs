@@ -299,24 +299,30 @@ async function resolveCognitiveWork({ provider, model, reasoningEffort, request,
       );
     }
 
-    const outputText = extractOutputText(parsed);
-    if (!outputText) {
+    const outputTexts = extractOutputTextCandidates(parsed);
+    if (outputTexts.length === 0) {
       previousFailure = `The response did not include output_text. Raw response: ${truncate(raw, 1200)}`;
       continue;
     }
 
-    const parsedOutput = safeJsonParse(outputText);
-    if (!isPlainObject(parsedOutput)) {
-      previousFailure = `The response was not a JSON object. Raw output text: ${truncate(outputText, 1200)}`;
-      continue;
+    let candidateFailure;
+    for (const outputText of outputTexts) {
+      const parsedOutput = safeJsonParse(outputText);
+      if (!isPlainObject(parsedOutput)) {
+        candidateFailure =
+          `The response was not a JSON object. Raw output text: ${truncate(outputText, 1200)}`;
+        continue;
+      }
+
+      const validationError = validateResolution(parsedOutput, expectedOutputs);
+      if (!validationError) {
+        return parsedOutput;
+      }
+
+      candidateFailure = validationError;
     }
 
-    const validationError = validateResolution(parsedOutput, expectedOutputs);
-    if (!validationError) {
-      return parsedOutput;
-    }
-
-    previousFailure = validationError;
+    previousFailure = candidateFailure;
   }
 
   if (lastTransportError && !previousFailure) {
@@ -475,21 +481,49 @@ function truncate(value, maxLength) {
   return `${value.slice(0, maxLength)}...`;
 }
 
-function extractOutputText(response) {
+function extractOutputTextCandidates(response) {
+  const ranked = [[], [], []];
+
   if (typeof response.output_text === "string" && response.output_text.trim()) {
-    return response.output_text;
+    ranked[0].push(response.output_text.trim());
   }
 
   const outputItems = Array.isArray(response.output) ? response.output : [];
   for (const item of outputItems) {
     const content = Array.isArray(item?.content) ? item.content : [];
-    for (const block of content) {
-      if (typeof block?.text === "string" && block.text.trim()) {
-        return block.text;
+    const texts = content
+      .map((block) => (typeof block?.text === "string" ? block.text.trim() : ""))
+      .filter(Boolean);
+
+    if (texts.length === 0) {
+      continue;
+    }
+
+    if (item?.type === "message" && item?.role === "assistant" && item?.phase === "final_answer") {
+      ranked[0].push(...texts);
+      continue;
+    }
+
+    if (item?.type === "message" && item?.role === "assistant") {
+      ranked[1].push(...texts);
+      continue;
+    }
+
+    ranked[2].push(...texts);
+  }
+
+  const seen = new Set();
+  const candidates = [];
+  for (const group of ranked) {
+    for (const text of group.reverse()) {
+      if (seen.has(text)) {
+        continue;
       }
+      seen.add(text);
+      candidates.push(text);
     }
   }
-  return undefined;
+  return candidates;
 }
 
 function compactAnswersPayload(answers, approvals) {
