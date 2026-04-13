@@ -64,10 +64,6 @@ jobs:
           pnpm --dir runx install --no-frozen-lockfile
           pnpm --dir runx build
 
-      - name: Install Sourcey CLI
-        if: ${{ steps.preflight.outputs.enabled == 'true' }}
-        run: npm install -g sourcey
-
       - name: Configure git author
         if: ${{ steps.preflight.outputs.enabled == 'true' }}
         run: |
@@ -80,7 +76,6 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           mkdir -p .artifacts/sourcey-refresh
-          SOURCEY_BIN="$(command -v sourcey)"
           node scripts/runx-agent-bridge.mjs \
             --runx-root "$GITHUB_WORKSPACE/runx" \
             --receipt-dir "$GITHUB_WORKSPACE/.artifacts/sourcey-refresh/receipts" \
@@ -94,7 +89,7 @@ jobs:
             --homepage_url "https://github.com/auscaster/automaton" \
             --docs_inputs '{"mode":"config","config":"docs/sourcey.config.ts"}' \
             --output_dir "$GITHUB_WORKSPACE/.sourcey/runx-docs" \
-            --sourcey_bin "$SOURCEY_BIN"
+            --sourcey_bin "$GITHUB_WORKSPACE/scripts/sourcey-wrapper.sh"
 
       - name: Validate repo after sourcey refresh
         if: ${{ steps.preflight.outputs.enabled == 'true' }}

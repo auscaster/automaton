@@ -18,6 +18,7 @@ const required = [
   "docs/operations.md",
   "scripts/runx-dogfood.sh",
   "scripts/runx-agent-bridge.mjs",
+  "scripts/sourcey-wrapper.sh",
   "scripts/prepare-issue-to-pr-request.mjs",
   "scripts/post-issue-triage-comment.mjs",
   "scripts/publish-runx-pr.mjs",
