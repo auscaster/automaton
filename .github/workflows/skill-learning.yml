@@ -21,6 +21,7 @@ jobs:
     if: ${{ startsWith(github.event.issue.title, '[skill]') }}
     runs-on: ubuntu-latest
     env:
+      GH_TOKEN: ${{ github.token }}
       RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
       RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:
@@ -76,6 +77,8 @@ jobs:
         if: ${{ steps.preflight.outputs.enabled == 'true' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           mkdir -p .artifacts/skill-learning
           node scripts/runx-agent-bridge.mjs \
@@ -85,8 +88,8 @@ jobs:
             --output "$GITHUB_WORKSPACE/.artifacts/skill-learning/result.json" \
             -- \
             skill "$GITHUB_WORKSPACE/runx/skills/objective-to-skill" \
-            --objective "${{ github.event.issue.title }}" \
-            --project_context "${{ github.event.issue.body }}"
+            --objective "$ISSUE_TITLE" \
+            --project_context "$ISSUE_BODY"
 
       - name: Materialize proposal
         if: ${{ steps.preflight.outputs.enabled == 'true' }}

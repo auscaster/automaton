@@ -17,6 +17,7 @@ jobs:
   sourcey-refresh:
     runs-on: ubuntu-latest
     env:
+      GH_TOKEN: ${{ github.token }}
       RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
       RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:
@@ -86,7 +87,11 @@ jobs:
             --approve sourcey.discovery.approval \
             -- \
             skill "$GITHUB_WORKSPACE/runx/skills/sourcey" \
-            --project "$GITHUB_WORKSPACE"
+            --project "$GITHUB_WORKSPACE" \
+            --brand_name "automaton" \
+            --homepage_url "https://github.com/auscaster/automaton" \
+            --docs_inputs '{"mode":"config","config":"docs/sourcey.config.ts"}' \
+            --output_dir "$GITHUB_WORKSPACE/.sourcey/runx-docs"
 
       - name: Validate repo after sourcey refresh
         if: ${{ steps.preflight.outputs.enabled == 'true' }}

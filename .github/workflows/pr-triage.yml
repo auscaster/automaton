@@ -21,6 +21,7 @@ jobs:
   pr-triage:
     runs-on: ubuntu-latest
     env:
+      GH_TOKEN: ${{ github.token }}
       RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
       RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:

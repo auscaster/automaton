@@ -21,6 +21,7 @@ jobs:
     if: ${{ !startsWith(github.event.issue.title, '[skill]') }}
     runs-on: ubuntu-latest
     env:
+      GH_TOKEN: ${{ github.token }}
       RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
       RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:
@@ -82,6 +83,8 @@ jobs:
         if: ${{ steps.preflight.outputs.enabled == 'true' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
         run: |
           mkdir -p .artifacts/issue-to-pr
           ISSUE_URL="${{ github.event.issue.html_url }}"
@@ -92,8 +95,8 @@ jobs:
             --output "$GITHUB_WORKSPACE/.artifacts/issue-to-pr/triage-result.json" \
             -- \
             skill "$GITHUB_WORKSPACE/runx/skills/support-triage" \
-            --title "${{ github.event.issue.title }}" \
-            --body "${{ github.event.issue.body }}" \
+            --title "$ISSUE_TITLE" \
+            --body "$ISSUE_BODY" \
             --source "github_issue" \
             --source_id "${{ github.event.issue.number }}" \
             --source_url "$ISSUE_URL" \
