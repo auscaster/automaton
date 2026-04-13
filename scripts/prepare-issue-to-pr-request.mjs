@@ -4,11 +4,12 @@ const options = parseArgs(process.argv.slice(2));
 const report = JSON.parse(await readFile(options.input, "utf8"));
 const payload = JSON.parse(report.execution.stdout);
 const triage = payload.triage_report ?? {};
-const defaultComment =
-  triage.suggested_reply ??
-  `runx classified this request as ${triage.recommended_lane ?? "manual-triage"} and did not open a PR.`;
+const defaultComment = resolveCommentBody(triage);
+const mayProceedToBuild =
+  triage.commence_decision === "approve" && triage.action_decision === "proceed_to_build";
 
-const output = triage.recommended_lane === "issue-to-pr" && triage.issue_to_pr_request
+const output =
+  triage.recommended_lane === "issue-to-pr" && triage.issue_to_pr_request && mayProceedToBuild
   ? {
       mode: "issue-to-pr",
       triage_report: triage,
@@ -53,4 +54,21 @@ function requireValue(argv, index, flag) {
     throw new Error(`${flag} requires a value.`);
   }
   return value;
+}
+
+function resolveCommentBody(triage) {
+  if (
+    triage.action_decision === "request_review" &&
+    triage.review_target === "issue" &&
+    typeof triage.review_comment === "string" &&
+    triage.review_comment.trim()
+  ) {
+    return triage.review_comment.trim();
+  }
+
+  if (typeof triage.suggested_reply === "string" && triage.suggested_reply.trim()) {
+    return triage.suggested_reply.trim();
+  }
+
+  return `runx classified this request as ${triage.recommended_lane ?? "manual-triage"} and did not open a PR.`;
 }
