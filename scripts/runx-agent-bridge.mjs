@@ -19,7 +19,9 @@ async function main() {
     ...options.approve,
   ]);
   const provider = options.provider ?? process.env.RUNX_CALLER_PROVIDER ?? "openai";
-  const model = options.model ?? process.env.RUNX_CALLER_MODEL ?? "gpt-4o-2024-08-06";
+  const model = options.model ?? process.env.RUNX_CALLER_MODEL ?? "gpt-5.4";
+  const reasoningEffort =
+    options.reasoningEffort ?? process.env.RUNX_CALLER_REASONING_EFFORT ?? "xhigh";
   const maxTurns = Number(options.maxTurns ?? process.env.RUNX_CALLER_MAX_TURNS ?? "8");
 
   if (!existsSync(cliBin)) {
@@ -78,6 +80,7 @@ async function main() {
         answers[request.id] = await resolveCognitiveWork({
           provider,
           model,
+          reasoningEffort,
           request,
           traceDir,
         });
@@ -140,6 +143,10 @@ function parseArgs(argv) {
     }
     if (token === "--max-turns") {
       options.maxTurns = requireValue(argv, ++index, token);
+      continue;
+    }
+    if (token === "--reasoning-effort") {
+      options.reasoningEffort = requireValue(argv, ++index, token);
       continue;
     }
     if (token === "--approve") {
@@ -214,7 +221,7 @@ async function runRunx({ cliBin, receiptDir, runArgs, workdir }) {
   }
 }
 
-async function resolveCognitiveWork({ provider, model, request, traceDir }) {
+async function resolveCognitiveWork({ provider, model, reasoningEffort, request, traceDir }) {
   if (provider !== "openai") {
     throw new Error(`Unsupported provider '${provider}'.`);
   }
@@ -223,128 +230,183 @@ async function resolveCognitiveWork({ provider, model, request, traceDir }) {
     throw new Error("OPENAI_API_KEY is required for runx cognitive work.");
   }
 
-  const schema = buildResolutionSchema(request.work.envelope.expected_outputs ?? {});
   const requestId = sanitizeTraceName(request.id);
-  const payload = {
-    model,
-    input: [
-      {
-        role: "system",
-        content:
-          "You are the external caller for a governed runx skill boundary. Return only one JSON object that matches the provided schema exactly. Ground every field in the provided inputs and context. Do not invent repository state, URLs, files, APIs, or evidence that are not present in the envelope. Keep outputs bounded and practical so the run can continue safely.",
-      },
-      {
-        role: "user",
-        content: JSON.stringify(
-          {
-            request_id: request.id,
-            source_type: request.work.source_type,
-            agent: request.work.agent,
-            task: request.work.task,
-            envelope: request.work.envelope,
-          },
-          null,
-          2,
-        ),
-      },
-    ],
-    text: {
-      format: {
-        type: "json_schema",
-        name: "runx_resolution",
-        schema,
-        strict: true,
-      },
-    },
-  };
+  const expectedOutputs = request.work.envelope.expected_outputs ?? {};
+  let previousFailure;
+  const maxAttempts = Number(process.env.RUNX_CALLER_MAX_ATTEMPTS ?? "2");
 
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      "X-Client-Request-Id": requestId.slice(0, 128),
-    },
-    body: JSON.stringify(payload),
-  });
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const payload = {
+      model,
+      input: buildInputMessages(request, expectedOutputs, previousFailure),
+      reasoning: {
+        effort: reasoningEffort,
+      },
+      text: {
+        format: {
+          type: "json_object",
+        },
+      },
+    };
 
-  const raw = await response.text();
-  const parsed = raw ? JSON.parse(raw) : {};
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "X-Client-Request-Id": `${requestId}-${attempt}`.slice(0, 128),
+      },
+      body: JSON.stringify(payload),
+    });
 
-  await writeFile(
-    path.join(traceDir, `${requestId}.json`),
-    `${JSON.stringify({ request: payload, response: parsed }, null, 2)}\n`,
+    const raw = await response.text();
+    const parsed = safeJsonParse(raw);
+
+    await writeFile(
+      path.join(traceDir, `${requestId}-attempt-${attempt}.json`),
+      `${JSON.stringify({ request: payload, response: parsed, raw_response: raw }, null, 2)}\n`,
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `OpenAI request failed: ${response.status} ${response.statusText}\n${truncate(raw, 4000)}`,
+      );
+    }
+
+    const outputText = extractOutputText(parsed);
+    if (!outputText) {
+      previousFailure = `The response did not include output_text. Raw response: ${truncate(raw, 1200)}`;
+      continue;
+    }
+
+    const parsedOutput = safeJsonParse(outputText);
+    if (!isPlainObject(parsedOutput)) {
+      previousFailure = `The response was not a JSON object. Raw output text: ${truncate(outputText, 1200)}`;
+      continue;
+    }
+
+    const validationError = validateResolution(parsedOutput, expectedOutputs);
+    if (!validationError) {
+      return parsedOutput;
+    }
+
+    previousFailure = validationError;
+  }
+
+  throw new Error(
+    `OpenAI response for ${request.id} did not satisfy the expected output contract after ${maxAttempts} attempts: ${previousFailure}`,
   );
-
-  if (!response.ok) {
-    throw new Error(`OpenAI request failed: ${response.status} ${response.statusText}`);
-  }
-
-  const outputText = extractOutputText(parsed);
-  if (!outputText) {
-    throw new Error(`OpenAI response for ${request.id} did not include structured output text.`);
-  }
-
-  return JSON.parse(outputText);
 }
 
-function buildResolutionSchema(expectedOutputs) {
-  const properties = {};
-  const required = [];
+function buildInputMessages(request, expectedOutputs, previousFailure) {
+  const requiredKeys = Object.keys(expectedOutputs);
+  const lines = [
+    "You are the external caller for a governed runx skill boundary.",
+    "Return exactly one JSON object.",
+    "Do not wrap the JSON in markdown fences or prose.",
+    "Ground every field in the provided inputs and context.",
+    "Do not invent repository state, URLs, files, APIs, or evidence that are not present in the envelope.",
+    "Keep outputs bounded and practical so the run can continue safely.",
+  ];
 
-  for (const [key, value] of Object.entries(expectedOutputs)) {
-    properties[key] = schemaForDeclaredType(String(value));
-    required.push(key);
+  if (requiredKeys.length > 0) {
+    lines.push(`Required top-level keys: ${requiredKeys.join(", ")}.`);
+    lines.push(
+      `Expected top-level types: ${requiredKeys
+        .map((key) => `${key}=${expectedOutputs[key]}`)
+        .join(", ")}.`,
+    );
   }
 
-  return {
-    type: "object",
-    properties,
-    required,
-    additionalProperties: false,
-  };
+  const messages = [
+    {
+      role: "system",
+      content: lines.join(" "),
+    },
+    {
+      role: "user",
+      content: JSON.stringify(
+        {
+          request_id: request.id,
+          source_type: request.work.source_type,
+          agent: request.work.agent,
+          task: request.work.task,
+          envelope: request.work.envelope,
+        },
+        null,
+        2,
+      ),
+    },
+  ];
+
+  if (previousFailure) {
+    messages.push({
+      role: "user",
+      content: `The previous JSON output was invalid for this reason: ${previousFailure}\nReturn a corrected JSON object only.`,
+    });
+  }
+
+  return messages;
 }
 
-function schemaForDeclaredType(type) {
+function validateResolution(payload, expectedOutputs) {
+  for (const [key, declaredType] of Object.entries(expectedOutputs)) {
+    if (!(key in payload)) {
+      return `Missing required top-level key '${key}'.`;
+    }
+    const actualValue = payload[key];
+    if (!matchesDeclaredType(actualValue, String(declaredType))) {
+      return `Top-level key '${key}' must be ${declaredType}, got ${describeValue(actualValue)}.`;
+    }
+  }
+  return undefined;
+}
+
+function matchesDeclaredType(value, type) {
   switch (type) {
     case "string":
-      return { type: "string" };
+      return typeof value === "string";
     case "number":
-      return { type: "number" };
+      return typeof value === "number" && Number.isFinite(value);
     case "boolean":
-      return { type: "boolean" };
+      return typeof value === "boolean";
     case "array":
-      return {
-        type: "array",
-        items: {
-          anyOf: [
-            { type: "object", additionalProperties: true },
-            { type: "array", items: {} },
-            { type: "string" },
-            { type: "number" },
-            { type: "boolean" },
-            { type: "null" },
-          ],
-        },
-      };
+      return Array.isArray(value);
     case "json":
-      return {
-        anyOf: [
-          { type: "object", additionalProperties: true },
-          { type: "array", items: {} },
-          { type: "string" },
-          { type: "number" },
-          { type: "boolean" },
-          { type: "null" },
-        ],
-      };
+      return true;
     case "object":
     default:
-      return {
-        type: "object",
-        additionalProperties: true,
-      };
+      return isPlainObject(value);
   }
+}
+
+function isPlainObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function describeValue(value) {
+  if (Array.isArray(value)) {
+    return "array";
+  }
+  if (value === null) {
+    return "null";
+  }
+  return typeof value;
+}
+
+function safeJsonParse(value) {
+  try {
+    return value ? JSON.parse(value) : {};
+  } catch {
+    return value;
+  }
+}
+
+function truncate(value, maxLength) {
+  if (typeof value !== "string" || value.length <= maxLength) {
+    return value;
+  }
+  return `${value.slice(0, maxLength)}...`;
 }
 
 function extractOutputText(response) {

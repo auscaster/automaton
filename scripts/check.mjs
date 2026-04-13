@@ -17,6 +17,7 @@ const required = [
   "scripts/runx-dogfood.sh",
   "scripts/runx-agent-bridge.mjs",
   "scripts/prepare-issue-to-pr-request.mjs",
+  "scripts/post-issue-triage-comment.mjs",
   "scripts/publish-runx-pr.mjs",
   ".github/workflows/ci.yml",
   ".github/workflows/runx-dogfood.yml",

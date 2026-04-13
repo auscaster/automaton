@@ -4,19 +4,21 @@ const options = parseArgs(process.argv.slice(2));
 const report = JSON.parse(await readFile(options.input, "utf8"));
 const payload = JSON.parse(report.execution.stdout);
 const triage = payload.triage_report ?? {};
+const defaultComment =
+  triage.suggested_reply ??
+  `runx classified this request as ${triage.recommended_lane ?? "manual-triage"} and did not open a PR.`;
 
 const output = triage.recommended_lane === "issue-to-pr" && triage.issue_to_pr_request
   ? {
       mode: "issue-to-pr",
       triage_report: triage,
       issue_to_pr_request: triage.issue_to_pr_request,
+      comment_body: defaultComment,
     }
   : {
       mode: "comment",
       triage_report: triage,
-      comment_body:
-        triage.suggested_reply ??
-        `runx classified this request as ${triage.recommended_lane ?? "manual-triage"} and did not open a PR.`,
+      comment_body: defaultComment,
     };
 
 if (options.output) {

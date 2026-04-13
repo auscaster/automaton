@@ -18,10 +18,11 @@ concurrency:
 
 jobs:
   issue-to-pr:
-    if: ${{ startsWith(github.event.issue.title, '[issue-to-pr]') }}
+    if: ${{ !startsWith(github.event.issue.title, '[skill]') }}
     runs-on: ubuntu-latest
     env:
-      RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-4o-2024-08-06' }}
+      RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
+      RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:
       - name: Check lane prerequisites
         id: preflight
@@ -97,10 +98,12 @@ jobs:
             --source_id "${{ github.event.issue.number }}" \
             --source_url "$ISSUE_URL" \
             --product_context "automaton public dogfood repository" \
-            --operator_context "Prefer one bounded repo change. If the request is ambiguous, risky, or mostly informational, do not route it to issue-to-pr."
+            --operator_context "Always draft a user-facing suggested reply. Prefer one bounded repo change only when the issue is concrete enough for a single governed PR. If the request is ambiguous, risky, or mostly informational, do not route it to issue-to-pr."
           node scripts/prepare-issue-to-pr-request.mjs \
             --input "$GITHUB_WORKSPACE/.artifacts/issue-to-pr/triage-result.json" \
             --output "$GITHUB_WORKSPACE/.artifacts/issue-to-pr/triage-decision.json"
+          jq -r '.comment_body' "$GITHUB_WORKSPACE/.artifacts/issue-to-pr/triage-decision.json" \
+            > "$GITHUB_WORKSPACE/.artifacts/issue-to-pr/triage-comment.md"
           if [ "$(jq -r '.mode' "$GITHUB_WORKSPACE/.artifacts/issue-to-pr/triage-decision.json")" != "issue-to-pr" ]; then
             exit 0
           fi
@@ -128,18 +131,16 @@ jobs:
             --phase "phase1" \
             --scafld_bin "$HOME/.local/bin/scafld"
 
-      - name: Comment when triage chooses a non-PR lane
+      - name: Post triage issue comment
         if: ${{ steps.preflight.outputs.enabled == 'true' && always() }}
         run: |
-          if [ ! -f ".artifacts/issue-to-pr/triage-decision.json" ]; then
+          if [ ! -f ".artifacts/issue-to-pr/triage-comment.md" ]; then
             exit 0
           fi
-          if [ "$(jq -r '.mode' .artifacts/issue-to-pr/triage-decision.json)" = "issue-to-pr" ]; then
-            exit 0
-          fi
-          gh issue comment "${{ github.event.issue.number }}" \
+          node scripts/post-issue-triage-comment.mjs \
             --repo "${{ github.repository }}" \
-            --body "$(jq -r '.comment_body' .artifacts/issue-to-pr/triage-decision.json)"
+            --issue "${{ github.event.issue.number }}" \
+            --body-file ".artifacts/issue-to-pr/triage-comment.md"
 
       - name: Validate repo after issue lane
         if: ${{ steps.preflight.outputs.enabled == 'true' && hashFiles('.artifacts/issue-to-pr/result.json') != '' }}
@@ -178,7 +179,7 @@ jobs:
             --issue-number "${{ github.event.issue.number }}"
 
       - name: Upload artifacts
-        if: ${{ steps.preflight.outputs.enabled == 'true' }}
+        if: ${{ always() && steps.preflight.outputs.enabled == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: issue-to-pr-${{ github.event.issue.number }}

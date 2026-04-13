@@ -21,7 +21,8 @@ jobs:
     if: ${{ startsWith(github.event.issue.title, '[skill]') }}
     runs-on: ubuntu-latest
     env:
-      RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-4o-2024-08-06' }}
+      RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
+      RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:
       - name: Check lane prerequisites
         id: preflight
@@ -131,7 +132,7 @@ jobs:
             --issue-number "${{ github.event.issue.number }}"
 
       - name: Upload artifacts
-        if: ${{ steps.preflight.outputs.enabled == 'true' }}
+        if: ${{ always() && steps.preflight.outputs.enabled == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: skill-learning-${{ github.event.issue.number }}

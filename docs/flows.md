@@ -18,12 +18,13 @@ opens a draft PR.
 
 ## `issue-to-pr`
 
-Listens for issues whose title begins with `[issue-to-pr]`. The workflow:
+Listens for every normal issue except `[skill]` proposals. The workflow:
 
 1. runs `support-triage`
-2. passes bounded requests into `issue-to-pr`
-3. lets scafld carry the spec, audit, review, and archive lifecycle
-4. opens a draft PR from the resulting branch
+2. posts the triage reply back to the issue
+3. passes bounded requests into `issue-to-pr`
+4. lets scafld carry the spec, audit, review, and archive lifecycle
+5. opens a draft PR from the resulting branch
 
 ## `pr-triage`
 

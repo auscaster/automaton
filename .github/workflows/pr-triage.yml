@@ -6,6 +6,7 @@ on:
       - opened
       - reopened
       - ready_for_review
+      - synchronize
 
 permissions:
   contents: read
@@ -20,7 +21,8 @@ jobs:
   pr-triage:
     runs-on: ubuntu-latest
     env:
-      RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-4o-2024-08-06' }}
+      RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
+      RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
     steps:
       - name: Check lane prerequisites
         id: preflight
@@ -105,7 +107,7 @@ jobs:
             --sha "${{ github.event.pull_request.head.sha }}"
 
       - name: Upload artifacts
-        if: ${{ steps.preflight.outputs.enabled == 'true' }}
+        if: ${{ always() && steps.preflight.outputs.enabled == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: pr-triage-${{ github.event.pull_request.number }}
