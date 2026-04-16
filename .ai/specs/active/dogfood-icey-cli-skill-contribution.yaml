@@ -1,7 +1,7 @@
 spec_version: "1.1"
 task_id: "dogfood-icey-cli-skill-contribution"
 created: "2026-04-16T00:57:01Z"
-updated: "2026-04-16T01:08:20Z"
+updated: "2026-04-16T01:12:05Z"
 status: "in_progress"
 
 task:
@@ -113,9 +113,9 @@ task:
         status: "done"
         checked_at: "2026-04-16T01:04:36Z"
       - id: "dod6"
-        description: "Upstream PR CI result is checked and recorded"
+        description: "Upstream PR CI result is checked, recorded, and green"
         status: "done"
-        checked_at: "2026-04-16T01:08:09Z"
+        checked_at: "2026-04-16T01:11:54Z"
       - id: "dod7"
         description: "Public evidence relay for skill-contribution is checked"
         status: "done"
@@ -150,7 +150,7 @@ task:
         type: "integration"
         description: "Target PR CI checked"
         command: "gh pr view 2 --repo nilstate/icey-cli --json statusCheckRollup"
-        expected: "linux"
+        expected: "SUCCESS"
   constraints:
     approvals_required: []
     non_goals:
@@ -186,6 +186,9 @@ planning_log:
   - timestamp: "2026-04-16T01:08:10Z"
     actor: "agent"
     summary: "Executed scafld acceptance criteria for the dogfood spec; local preflight, validator, PR body references, hosted run 24486417144, PR CI inspection, and evidence relay checks all passed."
+  - timestamp: "2026-04-16T01:12:05Z"
+    actor: "agent"
+    summary: "Upstream nilstate/icey-cli PR CI completed successfully; linux check passed in 7m15s."
 phases:
   - id: "phase1"
     name: "Local preflight"
@@ -288,18 +291,18 @@ phases:
         type: "integration"
         description: "PR CI state checked"
         command: "gh pr view 2 --repo nilstate/icey-cli --json statusCheckRollup"
-        expected: "linux"
+        expected: "SUCCESS"
         result: "pass"
-        executed_at: "2026-04-16T01:08:09Z"
-        result_output: "{\"statusCheckRollup\":[{\"__typename\":\"CheckRun\",\"completedAt\":\"0001-01-01T00:00:00Z\",\"conclusion\":\"\",\"detailsUrl\":\"https://github.com/nilstate/icey-cli/actions/runs/24486423144/job/71562291942\",\"name\":"
+        executed_at: "2026-04-16T01:12:29Z"
+        result_output: "{\"statusCheckRollup\":[{\"__typename\":\"CheckRun\",\"completedAt\":\"2026-04-16T01:11:54Z\",\"conclusion\":\"SUCCESS\",\"detailsUrl\":\"https://github.com/nilstate/icey-cli/actions/runs/24486423144/job/71562291942\","
       - id: "ac4_2"
         type: "integration"
         description: "Evidence relay checked"
         command: "gh run list --repo auscaster/automaton --workflow publish-public-evidence.yml --limit 5 --json databaseId,status,conclusion,displayTitle,url"
         expected: "\"conclusion\":\"success\""
         result: "pass"
-        executed_at: "2026-04-16T01:08:10Z"
-        result_output: "[{\"conclusion\":\"success\",\"databaseId\":24486424931,\"displayTitle\":\"publish-public-evidence\",\"status\":\"completed\",\"url\":\"https://github.com/auscaster/automaton/actions/runs/24486424931\"},{\"conclusion\":\""
+        executed_at: "2026-04-16T01:12:30Z"
+        result_output: "[{\"conclusion\":\"success\",\"databaseId\":24486613855,\"displayTitle\":\"publish-public-evidence\",\"status\":\"completed\",\"url\":\"https://github.com/auscaster/automaton/actions/runs/24486613855\"},{\"conclusion\":\""
     status: "completed"
 
 rollback:
