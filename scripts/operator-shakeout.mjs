@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { evaluateCommentQuality } from "./evaluate-comment-quality.mjs";
 import { evaluateGeneratedPr } from "./evaluate-generated-pr.mjs";
 import { buildGeneratedPrPolicyPlan, ensureGeneratedPrPolicyBlock } from "./generated-pr-policy.mjs";
+import { buildIssueTriageComment } from "./issue-triage-markers.mjs";
 import { buildReplayGuardPlan } from "./issue-triage-replay-guard.mjs";
 import { buildRollbackPlan } from "./rollback-run.mjs";
 import { buildLaneRequestBody } from "./run-governed-pr-lane.mjs";
@@ -29,7 +30,15 @@ export async function buildOperatorShakeoutReport({ repoRoot, publishEvidencePat
   const docsPrBody = buildLaneRequestBody("docs-pr", "Clarify the deployment story.");
   const fixPrBody = buildLaneRequestBody("fix-pr", "Fix the activity ordering bug.");
   const commentEval = evaluateCommentQuality({
-    body: `<!-- automaton:runx-issue-triage -->\n\n## Next step\n\nPlease reproduce the ordering bug with one concrete example and update the feed guard once confirmed.`,
+    body: buildIssueTriageComment({
+      body: [
+        "Thanks for the report.",
+        "",
+        "- Please reproduce the ordering bug with one concrete example.",
+        "- Update the feed guard once the failing case is confirmed so the next change stays bounded.",
+      ].join("\n"),
+      fingerprint: "abc12345deadbeef",
+    }),
     subjectKind: "github_issue",
     subjectLocator: "nilstate/automaton#issue/101",
   });

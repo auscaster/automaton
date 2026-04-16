@@ -148,8 +148,13 @@ the draft-first observability lanes continue to run.
 - [scripts/run-issue-triage-workers.mjs](./scripts/run-issue-triage-workers.mjs):
   executes one or more isolated `issue-to-pr` workers and publishes the
   resulting draft PRs
+- [scripts/run-governed-pr-lane.mjs](./scripts/run-governed-pr-lane.mjs):
+  reusable governed draft-PR runner for `fix-pr` and `docs-pr`
 - [scripts/publish-runx-pr.mjs](./scripts/publish-runx-pr.mjs): reusable draft
   PR publisher for generated repo changes
+- [scripts/operator-shakeout.mjs](./scripts/operator-shakeout.mjs): local
+  shakeout for replay guard, PR policy, rollback, evidence routing, and the
+  governed PR lanes
 
 ## Local Validation
 
