@@ -1,13 +1,12 @@
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 
-const currentMarker = "<!-- automaton:runx-issue-triage -->";
+import { evaluateCommentQuality } from "./evaluate-comment-quality.mjs";
+import { buildIssueTriageComment, ISSUE_TRIAGE_MARKER } from "./issue-triage-markers.mjs";
 
 export async function main(argv = process.argv.slice(2)) {
   const options = parseArgs(argv);
   const body = (await readFile(options.bodyFile, "utf8")).trim();
-  const commentBody = [currentMarker, body].join("\n\n");
-
   const issue = JSON.parse(
     execFileSync(
       "gh",
@@ -26,18 +25,17 @@ export async function main(argv = process.argv.slice(2)) {
     ),
   );
 
-  const existing = (issue.comments ?? []).find(
-    (comment) => typeof comment.body === "string" && comment.body.includes(currentMarker),
-  );
-
-  if (existing?.body?.trim() === commentBody) {
-    process.stdout.write(
-      `${JSON.stringify({ status: "noop", reason: "comment already up to date" }, null, 2)}\n`,
-    );
+  const plan = buildIssueCommentPlan({
+    options,
+    body,
+    comments: issue.comments ?? [],
+  });
+  if (plan.status !== "ready") {
+    process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`);
     process.exit(0);
   }
 
-  const existingCommentId = resolveIssueCommentId(existing);
+  const existingCommentId = resolveIssueCommentId(plan.existing_comment);
   if (existingCommentId) {
     execFileSync(
       "gh",
@@ -47,7 +45,7 @@ export async function main(argv = process.argv.slice(2)) {
         "PATCH",
         `repos/${options.repo}/issues/comments/${existingCommentId}`,
         "-f",
-        `body=${commentBody}`,
+        `body=${plan.comment_body}`,
       ],
       {
         stdio: "inherit",
@@ -69,7 +67,7 @@ export async function main(argv = process.argv.slice(2)) {
       "--repo",
       options.repo,
       "--body",
-      commentBody,
+      plan.comment_body,
     ],
     {
       stdio: "inherit",
@@ -77,6 +75,43 @@ export async function main(argv = process.argv.slice(2)) {
   );
 
   process.stdout.write(`${JSON.stringify({ status: "posted" }, null, 2)}\n`);
+}
+
+export function buildIssueCommentPlan({ options, body, comments = [] }) {
+  const commentBody = buildIssueTriageComment({
+    body,
+    fingerprint: options.fingerprint,
+  }).trim();
+  const evaluation = evaluateCommentQuality({
+    body: commentBody,
+    subjectKind: "github_issue",
+    subjectLocator: `${options.repo}#issue/${options.issue}`,
+  });
+  if (evaluation.status !== "pass") {
+    return {
+      status: "noop",
+      reason: "comment_quality_needs_review",
+      evaluation,
+    };
+  }
+
+  const existing = comments.find(
+    (comment) => typeof comment.body === "string" && comment.body.includes(ISSUE_TRIAGE_MARKER),
+  );
+  if (existing?.body?.trim() === commentBody) {
+    return {
+      status: "noop",
+      reason: "comment already up to date",
+      evaluation,
+    };
+  }
+
+  return {
+    status: "ready",
+    comment_body: commentBody,
+    existing_comment: existing ?? null,
+    evaluation,
+  };
 }
 
 function parseArgs(argv) {
@@ -93,6 +128,10 @@ function parseArgs(argv) {
     }
     if (token === "--body-file") {
       options.bodyFile = requireValue(argv, ++index, token);
+      continue;
+    }
+    if (token === "--fingerprint") {
+      options.fingerprint = requireValue(argv, ++index, token);
       continue;
     }
     throw new Error(`Unknown argument: ${token}`);

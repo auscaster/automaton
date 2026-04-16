@@ -34,7 +34,12 @@ test("buildCommentPlan includes marker and sha for eligible PRs", () => {
       pr: "101",
       sha: "abc1234",
     },
-    body: "Useful bounded comment",
+    body: [
+      "Thanks for pushing this.",
+      "",
+      "- Please add one repro or validation note that shows the docs example now passes.",
+      "- If that already exists elsewhere in the thread, link it instead of repeating the whole review.",
+    ].join("\n"),
     runner() {
       return JSON.stringify({
         title: "docs: fix broken example",
@@ -60,7 +65,12 @@ test("buildCommentPlan noops when the exact marker and head sha already exist", 
       pr: "101",
       sha: "abc1234",
     },
-    body: "Useful bounded comment",
+    body: [
+      "Thanks for pushing this.",
+      "",
+      "- Please add one repro or validation note that shows the docs example now passes.",
+      "- If that already exists elsewhere in the thread, link it instead of repeating the whole review.",
+    ].join("\n"),
     runner() {
       return JSON.stringify({
         title: "docs: fix broken example",
@@ -89,7 +99,12 @@ test("buildCommentPlan noops when a human PR has no welcome signal", () => {
       pr: "102",
       sha: "abc9999",
     },
-    body: "Useful bounded comment",
+    body: [
+      "Thanks for pushing this.",
+      "",
+      "- Please add one repro or validation note that shows the docs example now passes.",
+      "- If that already exists elsewhere in the thread, link it instead of repeating the whole review.",
+    ].join("\n"),
     runner() {
       return JSON.stringify({
         title: "docs: fix typo",
@@ -105,4 +120,31 @@ test("buildCommentPlan noops when a human PR has no welcome signal", () => {
 
   assert.equal(plan.status, "noop");
   assert.match(plan.reasons.join(","), /comment_without_welcome_signal/);
+});
+
+test("buildCommentPlan noops on thin comments even for eligible PRs", () => {
+  const plan = buildCommentPlan({
+    options: {
+      repo: "vercel/next.js",
+      pr: "103",
+      sha: "abc7777",
+    },
+    body: "Looks good.",
+    runner(command, args) {
+      if (args[0] === "api") {
+        return JSON.stringify({ authorAssociation: "CONTRIBUTOR" });
+      }
+      return JSON.stringify({
+        title: "docs: fix example",
+        author: { login: "outside-dev" },
+        headRefName: "docs/fix-example",
+        labels: [{ name: "documentation" }],
+        comments: [],
+        reviews: [],
+      });
+    },
+  });
+
+  assert.equal(plan.status, "noop");
+  assert.equal(plan.reason, "comment_quality_needs_review");
 });

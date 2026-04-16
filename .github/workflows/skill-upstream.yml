@@ -123,6 +123,7 @@ jobs:
             --title "Add portable SKILL.md" \
             --commit-message "docs: add portable SKILL.md" \
             --body-file "$GITHUB_WORKSPACE/.artifacts/skill-upstream/pr-body.md" \
+            --lane skill-upstream \
             > "$GITHUB_WORKSPACE/.artifacts/skill-upstream/publish.json"
           cat "$GITHUB_WORKSPACE/.artifacts/skill-upstream/publish.json"
 

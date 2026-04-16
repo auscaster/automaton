@@ -138,6 +138,7 @@ jobs:
             --title "[runx] refresh Sourcey docs" \
             --commit-message "docs(sourcey): refresh docs source" \
             --body-file ".artifacts/sourcey-refresh/pr-body.md" \
+            --lane sourcey-refresh \
             > .artifacts/sourcey-refresh/publish.json
           cat .artifacts/sourcey-refresh/publish.json
 

@@ -11,15 +11,10 @@ if (!body) {
   throw new Error("Could not find response_draft.body or publish_packet.body in the run output.");
 }
 
-const comment = [
-  "<!-- automaton:runx-issue-triage -->",
-  body.trim(),
-].join("\n\n");
-
 if (options.output) {
-  await writeFile(options.output, `${comment}\n`);
+  await writeFile(options.output, `${body.trim()}\n`);
 } else {
-  process.stdout.write(`${comment}\n`);
+  process.stdout.write(`${body.trim()}\n`);
 }
 
 function parseArgs(argv) {

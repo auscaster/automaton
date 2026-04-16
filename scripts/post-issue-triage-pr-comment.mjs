@@ -1,9 +1,13 @@
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 
+import { evaluateCommentQuality } from "./evaluate-comment-quality.mjs";
+import {
+  buildIssueTriageComment,
+  parseIssueTriageCommentMetadata,
+} from "./issue-triage-markers.mjs";
 import { evaluatePublicCommentOpportunity } from "./public-work-policy.mjs";
 
-const marker = "<!-- automaton:runx-issue-triage -->";
 const defaultRunner = (command, args) => execFileSync(command, args, { encoding: "utf8" });
 
 export async function postIssueTriagePrComment(argv = process.argv.slice(2), runner = defaultRunner) {
@@ -81,12 +85,11 @@ export function buildCommentPlan({ options, body, runner = defaultRunner }) {
     };
   }
 
-  const shaMarker = `Head SHA: ${options.sha}`;
   const existing = (report.comments ?? []).find(
-    (comment) =>
-      typeof comment.body === "string" &&
-      comment.body.includes(marker) &&
-      comment.body.includes(shaMarker),
+    (comment) => {
+      const metadata = parseIssueTriageCommentMetadata(comment?.body);
+      return metadata.has_marker && metadata.sha === options.sha;
+    },
   );
   if (existing) {
     return {
@@ -95,9 +98,24 @@ export function buildCommentPlan({ options, body, runner = defaultRunner }) {
     };
   }
 
+  const commentBody = buildIssueTriageComment({ body, sha: options.sha }).trim();
+  const evaluation = evaluateCommentQuality({
+    body: commentBody,
+    subjectKind: "github_pull_request",
+    subjectLocator: `${options.repo}#pr/${options.pr}`,
+  });
+  if (evaluation.status !== "pass") {
+    return {
+      status: "noop",
+      reason: "comment_quality_needs_review",
+      evaluation,
+    };
+  }
+
   return {
     status: "ready",
-    comment_body: `${marker}\n${body}\n\n${shaMarker}`,
+    comment_body: commentBody,
+    evaluation,
   };
 }
 

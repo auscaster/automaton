@@ -160,8 +160,26 @@ jobs:
             echo "Target repo '${{ steps.issue.outputs.target_repo }}' has no curated target dossier; skipping issue-triage." >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Run issue-triage on issue
+      - name: Evaluate issue replay guard
         if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' }}
+        id: issue_replay_guard
+        run: |
+          node scripts/issue-triage-replay-guard.mjs \
+            --mode issue \
+            --repo "${{ steps.issue.outputs.target_repo }}" \
+            --issue "${{ steps.issue.outputs.number }}" \
+            --title "${{ steps.issue.outputs.title }}" \
+            --body "${{ steps.issue.outputs.body }}" \
+            > "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/replay-guard.json"
+          STATUS="$(jq -r '.status' "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/replay-guard.json")"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          if [ "$STATUS" != "run" ]; then
+            echo "Issue replay guard blocked this run." >> "$GITHUB_STEP_SUMMARY"
+            jq -r '"- " + (.reason // "unknown")' "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/replay-guard.json" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Run issue-triage on issue
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.issue_replay_guard.outputs.status == 'run' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           ISSUE_TITLE: ${{ steps.issue.outputs.title }}
@@ -213,6 +231,7 @@ jobs:
             --title "[runx] update issue-triage operator memory" \
             --commit-message "docs(memory): update issue-triage operator memory" \
             --body-file "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/operator-memory-pr-body.md" \
+            --lane issue-triage \
             > "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/operator-memory-publish.json"
           jq -r '.comment_body' "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/triage-decision.json" \
             > "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/triage-comment.md"
@@ -247,8 +266,28 @@ jobs:
             --work-root "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/workspaces" \
             --output "$GITHUB_WORKSPACE/.artifacts/issue-triage/issue/worker-run-summary.json"
 
+      - name: Evaluate issue comment quality
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.issue_replay_guard.outputs.status == 'run' }}
+        id: issue_comment_quality
+        run: |
+          if [ ! -f ".artifacts/issue-triage/issue/triage-comment.md" ]; then
+            echo "status=missing" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node scripts/evaluate-comment-quality.mjs \
+            --body-file ".artifacts/issue-triage/issue/triage-comment.md" \
+            --subject-kind github_issue \
+            --subject-locator "${{ steps.issue.outputs.target_repo }}#issue/${{ steps.issue.outputs.number }}" \
+            --output ".artifacts/issue-triage/issue/comment-eval.json"
+          STATUS="$(jq -r '.status' .artifacts/issue-triage/issue/comment-eval.json)"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          if [ "$STATUS" != "pass" ]; then
+            echo "Issue comment quality blocked public posting." >> "$GITHUB_STEP_SUMMARY"
+            jq -r '.checks | to_entries[] | select(.value == false) | "- " + .key' .artifacts/issue-triage/issue/comment-eval.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Post issue comment
-        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && always() }}
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.issue_replay_guard.outputs.status == 'run' && steps.issue_comment_quality.outputs.status == 'pass' && always() }}
         run: |
           if [ ! -f ".artifacts/issue-triage/issue/triage-comment.md" ]; then
             exit 0
@@ -256,6 +295,7 @@ jobs:
           node scripts/post-issue-triage-comment.mjs \
             --repo "${{ steps.issue.outputs.target_repo }}" \
             --issue "${{ steps.issue.outputs.number }}" \
+            --fingerprint "$(jq -r '.fingerprint // empty' .artifacts/issue-triage/issue/replay-guard.json)" \
             --body-file ".artifacts/issue-triage/issue/triage-comment.md"
 
       - name: Upload issue artifacts
@@ -360,8 +400,26 @@ jobs:
             jq -r '.reasons[] | "- " + .' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/policy.json" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-      - name: Run issue-triage on PR
+      - name: Evaluate PR replay guard
         if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' }}
+        id: pr_replay_guard
+        run: |
+          TARGET_REPO="${{ github.event.inputs.target_repo || github.repository }}"
+          node scripts/issue-triage-replay-guard.mjs \
+            --mode pr \
+            --repo "$TARGET_REPO" \
+            --pr "$(jq -r '.pr_number' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/pr-snapshot.json")" \
+            --sha "$(jq -r '.head_sha' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/pr-snapshot.json")" \
+            > "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/replay-guard.json"
+          STATUS="$(jq -r '.status' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/replay-guard.json")"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          if [ "$STATUS" != "run" ]; then
+            echo "PR replay guard blocked this run." >> "$GITHUB_STEP_SUMMARY"
+            jq -r '"- " + (.reason // "unknown")' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/replay-guard.json" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Run issue-triage on PR
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' && steps.pr_replay_guard.outputs.status == 'run' }}
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
@@ -405,17 +463,39 @@ jobs:
             --title "[runx] update issue-triage operator memory" \
             --commit-message "docs(memory): update issue-triage operator memory" \
             --body-file "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/operator-memory-pr-body.md" \
+            --lane issue-triage \
             > "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/operator-memory-publish.json"
 
       - name: Materialize PR comment
-        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' }}
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' && steps.pr_replay_guard.outputs.status == 'run' }}
         run: |
           node scripts/write-triage-comment.mjs \
             --input ".artifacts/issue-triage/pr/result.json" \
             --output ".artifacts/issue-triage/pr/comment.md"
 
+      - name: Evaluate PR comment quality
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' && steps.pr_replay_guard.outputs.status == 'run' }}
+        id: pr_comment_quality
+        run: |
+          if [ ! -f ".artifacts/issue-triage/pr/comment.md" ]; then
+            echo "status=missing" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          TARGET_REPO="${{ github.event.inputs.target_repo || github.repository }}"
+          node scripts/evaluate-comment-quality.mjs \
+            --body-file ".artifacts/issue-triage/pr/comment.md" \
+            --subject-kind github_pull_request \
+            --subject-locator "$TARGET_REPO#pr/$(jq -r '.pr_number' .artifacts/issue-triage/pr/pr-snapshot.json)" \
+            --output ".artifacts/issue-triage/pr/comment-eval.json"
+          STATUS="$(jq -r '.status' .artifacts/issue-triage/pr/comment-eval.json)"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          if [ "$STATUS" != "pass" ]; then
+            echo "PR comment quality blocked public posting." >> "$GITHUB_STEP_SUMMARY"
+            jq -r '.checks | to_entries[] | select(.value == false) | "- " + .key' .artifacts/issue-triage/pr/comment-eval.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Post PR comment
-        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' }}
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.target_scope.outputs.allowed == 'true' && steps.pr_policy.outputs.allowed == 'true' && steps.pr_replay_guard.outputs.status == 'run' && steps.pr_comment_quality.outputs.status == 'pass' }}
         run: |
           TARGET_REPO="${{ github.event.inputs.target_repo || github.repository }}"
           node scripts/post-issue-triage-pr-comment.mjs \

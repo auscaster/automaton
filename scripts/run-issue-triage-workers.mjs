@@ -9,6 +9,7 @@ import {
   loadVerificationProfileCatalogSync,
   resolveVerificationPlan,
 } from "./automaton-v1-contracts.mjs";
+import { evaluateGeneratedPr } from "./evaluate-generated-pr.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, "..");
@@ -240,11 +241,19 @@ async function runWorker({ options, workerRequest, index, verificationCatalog })
       `feat(issue): resolve #${options.issueNumber} (${workerNumber})`,
       "--body-file",
       prBodyPath,
+      "--lane",
+      "issue-triage",
       "--issue-number",
       options.issueNumber,
     ], { cwd: workDir });
     await writeFile(path.join(artifactDir, "publish.json"), `${publishJson}\n`);
     const publish = JSON.parse(publishJson);
+    const prEval = evaluateGeneratedPr({
+      publish,
+      body: await readFile(prBodyPath, "utf8"),
+      validation: JSON.parse(await readFile(path.join(artifactDir, "validation.json"), "utf8")),
+    });
+    await writeFile(path.join(artifactDir, "pr-eval.json"), `${JSON.stringify(prEval, null, 2)}\n`);
 
     if (publish.status === "published" && targetRepo === options.defaultRepo) {
       run("gh", [

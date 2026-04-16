@@ -1,11 +1,17 @@
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+
+import { ensureGeneratedPrPolicyBlock } from "./generated-pr-policy.mjs";
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const base = options.base ?? defaultBranch(options.repo);
   const existingPr = findExistingPr(options.repo, options.branch);
   const remoteLease = ensureRemoteLease(options.branch);
+  const prBody = ensureGeneratedPrPolicyBlock(readFileSync(options.bodyFile, "utf8"), {
+    lane: options.lane,
+  });
 
   if (!hasWorkingTreeChanges()) {
     process.stdout.write(
@@ -15,6 +21,11 @@ async function main() {
           reason: "working tree clean",
           pr_number: existingPr?.number ?? null,
           pr_url: existingPr?.url ?? null,
+          policy: {
+            lane: options.lane,
+            merge_policy: "human_review",
+            draft_only: true,
+          },
         },
         null,
         2,
@@ -25,6 +36,7 @@ async function main() {
 
   run("git", buildCheckoutArgs(options.branch, remoteLease));
   run("git", ["add", "-A"]);
+  const changeSummary = summarizeStagedChanges();
 
   if (!hasStagedChanges()) {
     process.stdout.write(
@@ -34,6 +46,11 @@ async function main() {
           reason: "no staged changes",
           pr_number: existingPr?.number ?? null,
           pr_url: existingPr?.url ?? null,
+          policy: {
+            lane: options.lane,
+            merge_policy: "human_review",
+            draft_only: true,
+          },
         },
         null,
         2,
@@ -59,10 +76,22 @@ async function main() {
       options.branch,
       "--title",
       options.title,
-      "--body-file",
-      options.bodyFile,
+      "--body",
+      prBody,
     ]);
     pr = findExistingPr(options.repo, options.branch);
+  } else {
+    run("gh", [
+      "pr",
+      "edit",
+      String(pr.number),
+      "--repo",
+      options.repo,
+      "--title",
+      options.title,
+      "--body",
+      prBody,
+    ]);
   }
 
   if (!pr) {
@@ -89,6 +118,12 @@ async function main() {
         base,
         pr_number: pr.number,
         pr_url: pr.url,
+        policy: {
+          lane: options.lane,
+          merge_policy: "human_review",
+          draft_only: true,
+        },
+        change_summary: changeSummary,
       },
       null,
       2,
@@ -120,6 +155,10 @@ function parseArgs(argv) {
       options.bodyFile = requireValue(argv, ++index, token);
       continue;
     }
+    if (token === "--lane") {
+      options.lane = requireValue(argv, ++index, token);
+      continue;
+    }
     if (token === "--base") {
       options.base = requireValue(argv, ++index, token);
       continue;
@@ -139,7 +178,7 @@ function parseArgs(argv) {
     throw new Error(`Unknown argument: ${token}`);
   }
 
-  for (const required of ["repo", "branch", "title", "commitMessage", "bodyFile"]) {
+  for (const required of ["repo", "branch", "title", "commitMessage", "bodyFile", "lane"]) {
     if (!options[required]) {
       throw new Error(`--${required.replace(/[A-Z]/g, (value) => `-${value.toLowerCase()}`)} is required.`);
     }
@@ -196,6 +235,37 @@ function hasStagedChanges() {
   } catch {
     return true;
   }
+}
+
+function summarizeStagedChanges() {
+  const report = run("git", ["diff", "--cached", "--numstat"]).trim();
+  if (!report) {
+    return {
+      file_count: 0,
+      additions: 0,
+      deletions: 0,
+      files: [],
+    };
+  }
+
+  const files = [];
+  let additions = 0;
+  let deletions = 0;
+  for (const line of report.split("\n")) {
+    const [added, removed, file] = line.split("\t");
+    additions += Number(added) || 0;
+    deletions += Number(removed) || 0;
+    if (file) {
+      files.push(file);
+    }
+  }
+
+  return {
+    file_count: files.length,
+    additions,
+    deletions,
+    files: files.slice(0, 20),
+  };
 }
 
 function defaultBranch(repo) {
