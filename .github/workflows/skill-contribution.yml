@@ -130,7 +130,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: skill-contribution-${{ inputs.target_repo }}-${{ github.run_id }}
+          name: skill-contribution-${{ github.run_id }}
           path: |
             .artifacts/skill-contribution
             .artifacts/skill-contribution.prepare.json
