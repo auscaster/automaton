@@ -23,3 +23,7 @@ advice.
 - prioritize exact reproductions, config clarity, and missing validation
 - do not widen formatter/linter debates beyond the thread’s concrete question
 - treat incomplete bug reports as routing work, not invention work
+
+## Recent Outcomes
+
+- 2026-04-16 · `issue-triage` · `success` · lane finished with success
