@@ -353,8 +353,9 @@ jobs:
             --snapshot "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/pr-snapshot.json" \
             --dossier "$GITHUB_WORKSPACE/state/targets/$TARGET_SLUG.md" \
             > "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/policy.json"
-          echo "allowed=$(jq -r 'if .allowed then \"true\" else \"false\" end' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/policy.json")" >> "$GITHUB_OUTPUT"
-          if [ "$(jq -r '.allowed' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/policy.json")" != "true" ]; then
+          ALLOWED="$(jq -r '.allowed' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/policy.json")"
+          echo "allowed=$ALLOWED" >> "$GITHUB_OUTPUT"
+          if [ "$ALLOWED" != "true" ]; then
             echo "Issue-triage PR gate blocked this run." >> "$GITHUB_STEP_SUMMARY"
             jq -r '.reasons[] | "- " + .' "$GITHUB_WORKSPACE/.artifacts/issue-triage/pr/policy.json" >> "$GITHUB_STEP_SUMMARY"
           fi
