@@ -70,8 +70,8 @@ jobs:
       - name: Install and build runx
         if: ${{ steps.preflight.outputs.enabled == 'true' }}
         run: |
-          pnpm --dir .runx/runx install --no-frozen-lockfile
-          pnpm --dir .runx/runx build
+          pnpm --dir .runx/runx/oss install --no-frozen-lockfile
+          pnpm --dir .runx/runx/oss build
 
       - name: Configure git author
         if: ${{ steps.preflight.outputs.enabled == 'true' }}

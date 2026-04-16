@@ -36,8 +36,8 @@ jobs:
 
       - name: Install and build runx
         run: |
-          pnpm --dir runx install --no-frozen-lockfile
-          pnpm --dir runx build
+          pnpm --dir runx/oss install --no-frozen-lockfile
+          pnpm --dir runx/oss build
 
       - name: Run live dogfood lane
         env:
