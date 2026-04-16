@@ -645,6 +645,33 @@ Rules:
 - the `site/` renders from `state/`, `history/`, `reflections/`, and public
   snapshots; it does not invent new canonical facts
 
+## Execution Surface Parity
+
+Approval logic should not rely only on branch names, folder convention, or
+human intuition. Mutating lanes should classify the surfaces they touch and
+carry that classification into their publication policy.
+
+For `automaton` itself:
+
+- promotion flows may write only to `state/targets/`, `history/`, and `reflections/`
+- promotion flows must never write to `doctrine/`
+- generated PR lanes must classify staged changes into constitutional,
+  learned-state, public-memory, public-face, docs, runtime, and repo-meta
+  surfaces before publication
+- lane policy must fail closed when the staged surface mix does not match the
+  lane's allowed surfaces
+
+That means:
+
+- `issue-triage` operator-memory PRs may touch learned-state and public-memory
+  surfaces
+- `docs-pr` may touch docs/public-face surfaces, but not doctrine or learned-state
+- `fix-pr` may touch runtime surfaces, but not doctrine or learned-state
+
+The publication policy should travel with the PR body and publication artifact
+so reviewers can see not just that a PR was generated, but what kind of repo
+surface it was allowed to change.
+
 ## Site Information Architecture
 
 The 10/10 public face should have a small, stable route contract:

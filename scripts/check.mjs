@@ -70,6 +70,8 @@ const required = [
   "scripts/apply-automaton-promotions.test.mjs",
   "scripts/automaton-core.mjs",
   "scripts/automaton-core.test.mjs",
+  "scripts/change-surface-governance.mjs",
+  "scripts/change-surface-governance.test.mjs",
   "scripts/promote-automaton-state.mjs",
   "scripts/promote-automaton-state.test.mjs",
   "scripts/proving-ground.sh",

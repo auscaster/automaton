@@ -117,6 +117,11 @@ These are no longer undefined gaps. They are explicit execution requirements.
   copy before posting
 - spam or minimized public comments are severe failures: remove or correct the comment, emit a reflection, update target memory, and apply a long cooldown before similar actions
 - authority only widens when eval quality is stable and reflected in receipts
+- generated PR lanes should record a change-surface policy alongside publication
+  so reviewers can see whether the run touched doctrine, learned state, public
+  memory, public face, docs, or runtime code
+- on `automaton` itself, doctrine writes remain human-only and learned/public
+  memory writes belong to dedicated promotion flows rather than general PR lanes
 
 ### Merge and rollback
 

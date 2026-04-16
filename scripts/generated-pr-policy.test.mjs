@@ -11,11 +11,19 @@ import {
 test("ensureGeneratedPrPolicyBlock appends a policy block", () => {
   const body = ensureGeneratedPrPolicyBlock("## Summary\n\nBounded change.", {
     lane: "issue-triage",
+    changeSurfacePolicy: {
+      status: "allowed",
+      internal_repo: true,
+      surfaces: ["learned_state", "public_history", "reflections"],
+      reasons: [],
+    },
   });
 
   const parsed = parseGeneratedPrPolicy(body);
   assert.equal(parsed?.lane, "issue-triage");
   assert.match(body, /## Generated PR Policy/);
+  assert.match(body, /## Change Surface Policy/);
+  assert.match(body, /`learned_state`/);
 });
 
 test("inferGeneratedPrLane derives the lane from branch naming", () => {

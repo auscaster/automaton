@@ -35,7 +35,7 @@ export function inferGeneratedPrLane({ headRefName, title, body }) {
   return "unknown";
 }
 
-export function ensureGeneratedPrPolicyBlock(body, { lane }) {
+export function ensureGeneratedPrPolicyBlock(body, { lane, changeSurfacePolicy = null }) {
   const trimmed = String(body ?? "").trim();
   if (parseGeneratedPrPolicy(trimmed)) {
     return trimmed;
@@ -51,7 +51,19 @@ export function ensureGeneratedPrPolicyBlock(body, { lane }) {
     "- Correction policy: use the `rollback` workflow or a corrective PR/comment when this output is wrong",
     "- Receipts: inspect the linked workflow artifacts before review or merge",
   ].join("\n");
-  return [trimmed, policyBlock].filter(Boolean).join("\n\n").trim();
+  const surfaceBlock = changeSurfacePolicy
+    ? [
+        "## Change Surface Policy",
+        "",
+        `- Repo scope: ${changeSurfacePolicy.internal_repo ? "`automaton` parity enforced" : "`external` report-only"}`,
+        `- Policy status: \`${changeSurfacePolicy.status}\``,
+        `- Surfaces touched: ${(changeSurfacePolicy.surfaces ?? []).map((surface) => `\`${surface}\``).join(", ") || "`none`"}`,
+        ...(Array.isArray(changeSurfacePolicy.reasons) && changeSurfacePolicy.reasons.length > 0
+          ? [`- Reasons: ${changeSurfacePolicy.reasons.map((reason) => `\`${reason}\``).join(", ")}`]
+          : []),
+      ].join("\n")
+    : "";
+  return [trimmed, policyBlock, surfaceBlock].filter(Boolean).join("\n\n").trim();
 }
 
 export function buildGeneratedPrPolicyPlan(report) {

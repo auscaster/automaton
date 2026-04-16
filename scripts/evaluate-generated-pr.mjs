@@ -18,6 +18,8 @@ export function evaluateGeneratedPr({ publish, body, validation }) {
     published: publish?.status === "published",
     policy_present: Boolean(policy),
     draft_only_policy: policy?.draft_only === true,
+    change_surface_policy_recorded: Boolean(publish?.change_surface_policy),
+    change_surface_policy_allowed: ["allowed", "report_only"].includes(publish?.change_surface_policy?.status),
     verification_recorded: (
       validationCommands.length > 0
       || typeof validation?.verification_profile === "string"
@@ -29,7 +31,12 @@ export function evaluateGeneratedPr({ publish, body, validation }) {
   const passed = Object.values(checks).filter(Boolean).length;
   return {
     schema: "runx.generated_pr_eval.v1",
-    status: checks.published && checks.policy_present && checks.draft_only_policy && checks.verification_recorded
+    status: checks.published
+      && checks.policy_present
+      && checks.draft_only_policy
+      && checks.change_surface_policy_recorded
+      && checks.change_surface_policy_allowed
+      && checks.verification_recorded
       ? "pass"
       : "needs_review",
     lane: policy?.lane ?? publish?.policy?.lane ?? "unknown",

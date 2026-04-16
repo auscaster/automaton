@@ -37,7 +37,7 @@ This is the live run catalog for `automaton`.
 - purpose: turn one bounded bugfix request into a validated draft `runx/*` PR
   outside issue-triage worker fanout
 - output: normalized request packet, verification report, receipts, draft PR,
-  generated-PR eval
+  generated-PR eval, change-surface policy
 
 ### `docs-pr`
 
@@ -46,7 +46,7 @@ This is the live run catalog for `automaton`.
 - purpose: turn one bounded docs or explanation request into a validated draft
   `runx/*` PR while constraining the mutation to docs-only scope
 - output: normalized request packet, verification report, receipts, draft PR,
-  generated-PR eval
+  generated-PR eval, change-surface policy
 
 ### `skill-upstream`
 
@@ -95,6 +95,8 @@ This is the live run catalog for `automaton`.
 - command: `node scripts/enforce-generated-pr-policy.mjs`
 - purpose: keep generated PRs draft-only and explicitly human-reviewed
 - output: policy-enforcement artifact plus any corrective PR body/comment update
+- note: publication now also carries a change-surface policy describing which
+  repo surfaces the generated branch touched
 
 ### `rollback`
 

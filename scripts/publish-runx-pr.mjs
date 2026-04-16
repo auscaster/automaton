@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
+import { evaluateLaneChangeSurfacePolicy } from "./change-surface-governance.mjs";
 import { ensureGeneratedPrPolicyBlock } from "./generated-pr-policy.mjs";
 
 async function main() {
@@ -9,9 +10,7 @@ async function main() {
   const base = options.base ?? defaultBranch(options.repo);
   const existingPr = findExistingPr(options.repo, options.branch);
   const remoteLease = ensureRemoteLease(options.branch);
-  const prBody = ensureGeneratedPrPolicyBlock(readFileSync(options.bodyFile, "utf8"), {
-    lane: options.lane,
-  });
+  const ownerRepo = options.ownerRepo ?? process.env.GITHUB_REPOSITORY ?? "nilstate/automaton";
 
   if (!hasWorkingTreeChanges()) {
     process.stdout.write(
@@ -26,6 +25,7 @@ async function main() {
             merge_policy: "human_review",
             draft_only: true,
           },
+          change_surface_policy: null,
         },
         null,
         2,
@@ -37,6 +37,12 @@ async function main() {
   run("git", buildCheckoutArgs(options.branch, remoteLease));
   run("git", ["add", "-A"]);
   const changeSummary = summarizeStagedChanges();
+  const changeSurfacePolicy = evaluateLaneChangeSurfacePolicy({
+    lane: options.lane,
+    repo: options.repo,
+    ownerRepo,
+    files: changeSummary.files,
+  });
 
   if (!hasStagedChanges()) {
     process.stdout.write(
@@ -51,6 +57,7 @@ async function main() {
             merge_policy: "human_review",
             draft_only: true,
           },
+          change_surface_policy: changeSurfacePolicy,
         },
         null,
         2,
@@ -58,6 +65,15 @@ async function main() {
     );
     return;
   }
+
+  if (changeSurfacePolicy.status === "blocked") {
+    throw new Error(`change surface policy blocked publication: ${changeSurfacePolicy.reasons.join(", ")}`);
+  }
+
+  const prBody = ensureGeneratedPrPolicyBlock(readFileSync(options.bodyFile, "utf8"), {
+    lane: options.lane,
+    changeSurfacePolicy,
+  });
 
   run("git", ["commit", "-m", options.commitMessage]);
   run("git", buildPushArgs(options.branch, remoteLease));
@@ -124,6 +140,7 @@ async function main() {
           draft_only: true,
         },
         change_summary: changeSummary,
+        change_surface_policy: changeSurfacePolicy,
       },
       null,
       2,
@@ -169,6 +186,10 @@ function parseArgs(argv) {
     }
     if (token === "--issue-repo") {
       options.issueRepo = requireValue(argv, ++index, token);
+      continue;
+    }
+    if (token === "--owner-repo") {
+      options.ownerRepo = requireValue(argv, ++index, token);
       continue;
     }
     if (token === "--close-existing-if-noop") {

@@ -1,7 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildCheckoutArgs, buildPushArgs, ensureRemoteLease } from "./publish-runx-pr.mjs";
+import {
+  buildCheckoutArgs,
+  buildPushArgs,
+  ensureRemoteLease,
+} from "./publish-runx-pr.mjs";
 
 test("ensureRemoteLease fetches the remote automation branch before pushing", () => {
   const calls = [];

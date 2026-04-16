@@ -14,6 +14,9 @@ test("evaluateGeneratedPr passes a published PR with policy and validation", () 
         additions: 12,
         deletions: 3,
       },
+      change_surface_policy: {
+        status: "allowed",
+      },
     },
     body: ensureGeneratedPrPolicyBlock("## Summary\n\nBounded PR body.", {
       lane: "issue-triage",
@@ -26,6 +29,7 @@ test("evaluateGeneratedPr passes a published PR with policy and validation", () 
 
   assert.equal(evaluation.status, "pass");
   assert.equal(evaluation.checks.policy_present, true);
+  assert.equal(evaluation.checks.change_surface_policy_recorded, true);
 });
 
 test("evaluateGeneratedPr flags missing policy blocks", () => {
@@ -37,6 +41,7 @@ test("evaluateGeneratedPr flags missing policy blocks", () => {
         additions: 4,
         deletions: 0,
       },
+      change_surface_policy: null,
     },
     body: "## Summary\n\nNo policy block here.",
     validation: {},
