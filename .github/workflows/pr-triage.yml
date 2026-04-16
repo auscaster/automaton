@@ -23,7 +23,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: pr-triage-${{ github.event.pull_request.number }}
+  group: pr-triage-${{ github.event.pull_request.number || github.event.inputs.pr_number || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -131,7 +131,7 @@ jobs:
           EOF
           node scripts/publish-runx-pr.mjs \
             --repo "${{ github.repository }}" \
-            --branch "runx/operator-memory-pr-triage" \
+            --branch "runx/operator-memory-pr-triage-pr-${{ github.event.inputs.pr_number || github.event.pull_request.number }}" \
             --title "[runx] update pr-triage operator memory" \
             --commit-message "docs(memory): update pr-triage operator memory" \
             --body-file "$GITHUB_WORKSPACE/.artifacts/pr-triage/operator-memory-pr-body.md" \
@@ -158,5 +158,5 @@ jobs:
         if: ${{ always() && steps.preflight.outputs.enabled == 'true' }}
         uses: actions/upload-artifact@v7
         with:
-          name: pr-triage-${{ github.event.pull_request.number }}
+          name: pr-triage-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
           path: .artifacts/pr-triage

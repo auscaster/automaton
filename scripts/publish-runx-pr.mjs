@@ -1,9 +1,11 @@
 import { execFileSync } from "node:child_process";
+import { pathToFileURL } from "node:url";
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   const base = options.base ?? defaultBranch(options.repo);
   const existingPr = findExistingPr(options.repo, options.branch);
+  const remoteLease = ensureRemoteLease(options.branch);
 
   if (!hasWorkingTreeChanges()) {
     if (options.closeExistingIfNoop && existingPr) {
@@ -81,7 +83,7 @@ async function main() {
   }
 
   run("git", ["commit", "-m", options.commitMessage]);
-  run("git", ["push", "-u", "origin", options.branch, "--force-with-lease"]);
+  run("git", buildPushArgs(options.branch, remoteLease));
 
   let pr = findExistingPr(options.repo, options.branch);
   if (!pr) {
@@ -201,6 +203,27 @@ function run(command, args) {
   });
 }
 
+export function ensureRemoteLease(branch, runner = run) {
+  const listing = runner("git", ["ls-remote", "--heads", "origin", branch]).trim();
+  if (!listing) {
+    return null;
+  }
+
+  const [remoteTip] = listing.split(/\s+/, 1);
+  runner("git", ["fetch", "--no-tags", "origin", `${branch}:refs/remotes/origin/${branch}`]);
+  return remoteTip;
+}
+
+export function buildPushArgs(branch, remoteLease) {
+  const args = ["git", "push", "-u", "origin", branch];
+  if (remoteLease) {
+    args.push(`--force-with-lease=refs/heads/${branch}:${remoteLease}`);
+  } else {
+    args.push("--force-with-lease");
+  }
+  return args;
+}
+
 function hasWorkingTreeChanges() {
   return run("git", ["status", "--porcelain"]).trim().length > 0;
 }
@@ -251,4 +274,6 @@ function closePr(repo, number, comment) {
   ]);
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}

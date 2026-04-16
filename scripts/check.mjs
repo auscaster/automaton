@@ -58,6 +58,7 @@ const required = [
   "scripts/post-issue-supervisor-comment.mjs",
   "scripts/run-issue-supervisor-workers.mjs",
   "scripts/publish-runx-pr.mjs",
+  "scripts/publish-runx-pr.test.mjs",
   ".github/workflows/ci.yml",
   ".github/workflows/runx-dogfood.yml",
   ".github/workflows/docs-pages.yml",
