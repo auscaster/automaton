@@ -43,7 +43,7 @@ jobs:
           if git ls-remote --exit-code --heads origin runx/evidence-projection-derive >/dev/null 2>&1; then
             git fetch --no-tags origin main runx/evidence-projection-derive:refs/remotes/origin/runx/evidence-projection-derive
             git checkout -B runx/evidence-projection-derive refs/remotes/origin/runx/evidence-projection-derive
-            git rebase origin/main
+            git merge --no-edit origin/main
           else
             git fetch --no-tags origin main
             git checkout -B runx/evidence-projection-derive origin/main
