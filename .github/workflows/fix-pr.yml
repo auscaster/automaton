@@ -54,6 +54,7 @@ jobs:
       RUNX_CALLER_MODEL: ${{ vars.RUNX_CALLER_MODEL || 'gpt-5.4' }}
       RUNX_CALLER_REASONING_EFFORT: ${{ vars.RUNX_CALLER_REASONING_EFFORT || 'xhigh' }}
       RUNX_CALLER_MAX_ATTEMPTS: ${{ vars.RUNX_CALLER_MAX_ATTEMPTS || '3' }}
+      RUNX_CALLER_REQUEST_TIMEOUT_MS: ${{ vars.RUNX_CALLER_REQUEST_TIMEOUT_MS || '300000' }}
     steps:
       - name: Check lane prerequisites
         id: preflight

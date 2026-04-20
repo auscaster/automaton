@@ -13,6 +13,10 @@ description: Secrets, thread teaching, artifacts, and what still needs hardening
   default workflow token
 - `RUNX_CALLER_MODEL` (optional repo variable): pinned model snapshot for the
   hosted bridge
+- `RUNX_CALLER_REQUEST_TIMEOUT_MS` (optional repo variable): per-request
+  timeout for external caller model invocations. Hosted workflows default to
+  `300000` so stuck cognitive work fails boundedly instead of occupying a
+  runner for twenty minutes
 - `RUNX_REPOSITORY_PAT` (optional secret): GitHub token for private `runx`
   checkout and other cross-repo automation that cannot rely on the default
   workflow token
