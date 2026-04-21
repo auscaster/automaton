@@ -10,3 +10,5 @@ site/.astro/
 # scafld
 .ai/logs/
 .ai/reviews/
+.ai/scafld/
+.ai/prompts/harden.md
