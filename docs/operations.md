@@ -98,13 +98,16 @@ Thread teaching is the canonical human-teaching layer:
 - generated PR policy enforcement keeps `runx/*` PRs draft-only and explicitly
   human-reviewed
 - `evidence-projection-derive` is now the only repo-owned evidence projection surface:
-  it rebuilds `history/`, `reflections/`, target dossier outcomes, and
-  `state/evidence-projections.json` from uploaded workflow artifacts, suppresses
-  repeated retries onto one latest projection per bounded objective, and updates
-  one rolling draft PR instead of opening one PR per triage event
+  it rebuilds `state/evidence-projections.json` from uploaded workflow
+  artifacts, suppresses repeated retries onto one latest projection per bounded
+  objective, promotes only durable or teaching-bearing rows into `history/`,
+  `reflections/`, and target dossier outcomes, and updates one rolling draft PR
+  instead of opening one PR per triage event
 - the rolling projection branch is reset from `main` and rebuilt on every derive
   run; the PR body and derive artifact bundle carry a latest-batch summary so
   reviewers can inspect the current pass directly
+- generic low-signal completions remain in `state/evidence-projections.json`
+  for runtime context and training instead of inflating public markdown surfaces
 - merge-watch is read-only against upstream repos. It records PR state, checks,
   merge commit, and upstream blob metadata, then emits an internal
   registry-binding request after merge

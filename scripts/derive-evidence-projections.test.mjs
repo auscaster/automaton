@@ -184,6 +184,7 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
   assert.equal(report.state.stats.skipped_artifacts, 1);
   assert.equal(report.state.artifacts[1].summaries[0].objective_fingerprint, "issue:nilstate-runx-11");
   assert.match(report.state.artifacts[1].summaries[0].projection_key, /issue:nilstate-runx-11/);
+  assert.equal(report.state.artifacts[1].summaries[0].promotion_scope, "public");
   assert.equal(report.latest_batch.workflow_run_id, "24704064892");
   assert.deepEqual(report.latest_batch.touched_targets, ["nilstate/runx"]);
   assert.equal(report.latest_batch.skipped_reasons.no_core_summary, 1);
@@ -192,6 +193,89 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
   assert.doesNotMatch(dossier, /rcpt_101/);
   assert.match(selectedReflection, /# Reflection 102/);
   assert.match(selectedHistory, /# History 102/);
+});
+
+test("deriveEvidenceProjections keeps generic low-signal summaries in state only", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "aster-evidence-projections-state-only-"));
+  const repoRoot = path.join(tempRoot, "repo");
+  const statePath = path.join(repoRoot, "state", "evidence-projections.json");
+  await mkdir(path.join(repoRoot, "state"), { recursive: true });
+
+  const report = await deriveEvidenceProjections(
+    {
+      repoRoot,
+      repo: "nilstate/aster",
+      output: statePath,
+      downloadRoot: path.join(tempRoot, "downloads"),
+      now: "2026-04-21T00:00:00Z",
+    },
+    {
+      listArtifacts: async () => ([
+        {
+          id: 201,
+          name: "issue-triage-pr-88",
+          created_at: "2026-04-21T00:00:00Z",
+          updated_at: "2026-04-21T00:01:00Z",
+          expired: false,
+          workflow_run: { id: 9100, head_branch: "main", head_sha: "eee555" },
+        },
+      ]),
+      downloadArtifact: async ({ outputDir }) => {
+        const promotionsDir = path.join(outputDir, "promotions");
+        await mkdir(promotionsDir, { recursive: true });
+
+        const reflectionPath = path.join(promotionsDir, "2026-04-21-issue-triage-pr-88.md");
+        const historyPath = path.join(promotionsDir, "history-2026-04-21-issue-triage-pr-88.md");
+        const packetPath = path.join(promotionsDir, "2026-04-21-issue-triage-pr-88.json");
+
+        await writeFile(reflectionPath, "# Reflection 201\n");
+        await writeFile(historyPath, "# History 201\n");
+        await writeFile(
+          packetPath,
+          `${JSON.stringify(
+            {
+              created_at: "2026-04-21T00:00:00Z",
+              lane: "issue-triage",
+              status: "success",
+              receipt_id: "rcpt_201",
+              summary: "lane finished with success",
+              subject: {
+                locator: "nilstate/aster#pr/88",
+                target_repo: "nilstate/aster",
+              },
+            },
+            null,
+            2,
+          )}\n`,
+        );
+        await writeFile(
+          path.join(outputDir, "core-summary.json"),
+          `${JSON.stringify({
+            lane: "issue-triage",
+            promotion_outputs: {
+              reflection_path: reflectionPath,
+              history_path: historyPath,
+              packet_path: packetPath,
+            },
+          }, null, 2)}\n`,
+        );
+      },
+    },
+  );
+
+  assert.equal(report.replayed_projection_groups, 1);
+  assert.equal(report.state.artifacts[0].summaries[0].promotion_scope, "state_only");
+  assert.equal(report.latest_batch.public_projection_groups, 0);
+  assert.equal(report.latest_batch.state_only_projection_groups, 1);
+  await assert.rejects(
+    readFile(path.join(repoRoot, "reflections", "2026-04-21-issue-triage-pr-88.md"), "utf8"),
+  );
+  await assert.rejects(
+    readFile(path.join(repoRoot, "history", "2026-04-21-issue-triage-pr-88.md"), "utf8"),
+  );
+  await assert.rejects(
+    readFile(path.join(repoRoot, "state", "targets", "nilstate-aster.md"), "utf8"),
+  );
 });
 
 test("renderLatestBatchMarkdown formats the current derive batch for the rolling PR body", () => {
@@ -205,6 +289,8 @@ test("renderLatestBatchMarkdown formats the current derive batch for the rolling
     replayed_projection_groups: 23,
     applied_summaries: 7,
     suppressed_summaries: 2,
+    public_projection_groups: 4,
+    state_only_projection_groups: 3,
     skipped_artifacts: 1,
     error_count: 0,
     touched_targets: ["nilstate/aster", "nilstate/runx"],
@@ -219,4 +305,6 @@ test("renderLatestBatchMarkdown formats the current derive batch for the rolling
   assert.match(markdown, /Touched Targets/);
   assert.match(markdown, /nilstate\/runx/);
   assert.match(markdown, /Skip Reasons/);
+  assert.match(markdown, /Public projection summaries/);
+  assert.match(markdown, /State-only summaries/);
 });

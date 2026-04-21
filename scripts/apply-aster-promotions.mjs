@@ -24,6 +24,7 @@ async function main(argv = process.argv.slice(2)) {
 export async function applyAsterPromotions(options) {
   const repoRoot = path.resolve(options.repoRoot);
   const summaryPath = path.resolve(options.summary);
+  const promotionScope = normalizePromotionScope(options.promotionScope ?? options.scope);
   const summary = JSON.parse(await readFile(summaryPath, "utf8"));
   const promotionOutputs = resolvePromotionOutputs(summary?.promotion_outputs, summaryPath);
   const packet = JSON.parse(await readFile(promotionOutputs.packet_path, "utf8"));
@@ -36,30 +37,34 @@ export async function applyAsterPromotions(options) {
     "history",
     path.basename(historySource).replace(/^history-/, ""),
   );
-  assertManagedPromotionTarget(repoRoot, reflectionTarget);
-  assertManagedPromotionTarget(repoRoot, historyTarget);
-
-  await mkdir(path.dirname(reflectionTarget), { recursive: true });
-  await mkdir(path.dirname(historyTarget), { recursive: true });
-  await copyIfChanged(reflectionSource, reflectionTarget);
-  await copyIfChanged(historySource, historyTarget);
-
   const targetRepo = firstString(packet?.subject?.target_repo)
     || firstString(packet?.subject?.repo)
     || "nilstate/aster";
   const targetSlug = slugifyRepoLike(targetRepo);
   const targetDossierPath = path.join(repoRoot, "state", "targets", `${targetSlug}.md`);
-  assertManagedPromotionTarget(repoRoot, targetDossierPath);
-  const targetUpdated = await updateTargetRecentOutcomes({
-    dossierPath: targetDossierPath,
-    packet,
-  });
+  let targetUpdated = false;
+
+  if (promotionScope === "public") {
+    assertManagedPromotionTarget(repoRoot, reflectionTarget);
+    assertManagedPromotionTarget(repoRoot, historyTarget);
+    assertManagedPromotionTarget(repoRoot, targetDossierPath);
+
+    await mkdir(path.dirname(reflectionTarget), { recursive: true });
+    await mkdir(path.dirname(historyTarget), { recursive: true });
+    await copyIfChanged(reflectionSource, reflectionTarget);
+    await copyIfChanged(historySource, historyTarget);
+    targetUpdated = await updateTargetRecentOutcomes({
+      dossierPath: targetDossierPath,
+      packet,
+    });
+  }
 
   return {
     status: "applied",
-    reflection_path: reflectionTarget,
-    history_path: historyTarget,
-    target_dossier_path: targetDossierPath,
+    promotion_scope: promotionScope,
+    reflection_path: promotionScope === "public" ? reflectionTarget : null,
+    history_path: promotionScope === "public" ? historyTarget : null,
+    target_dossier_path: promotionScope === "public" ? targetDossierPath : null,
     target_updated: targetUpdated,
   };
 }
@@ -267,6 +272,10 @@ function requireValue(argv, index, flag) {
 
 function firstString(value) {
   return typeof value === "string" && value.trim().length > 0 ? value.trim() : "";
+}
+
+function normalizePromotionScope(value) {
+  return firstString(value) === "state_only" ? "state_only" : "public";
 }
 
 if (process.argv[1] && import.meta.url === new URL(`file://${process.argv[1]}`).href) {

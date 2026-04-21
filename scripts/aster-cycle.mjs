@@ -762,10 +762,12 @@ async function loadTargetDossiers(targetDir) {
 
 async function loadOperatorMemory(repoRoot) {
   const threadTeachingState = await readOptionalJson(path.join(repoRoot, "state", "thread-teaching.json"));
+  const evidenceProjectionState = await readOptionalJson(path.join(repoRoot, "state", "evidence-projections.json"));
   return {
     history: await loadMarkdownMemory(path.join(repoRoot, "history"), repoRoot),
     reflections: await loadMarkdownMemory(path.join(repoRoot, "reflections"), repoRoot),
     thread_teaching: Array.isArray(threadTeachingState?.records) ? threadTeachingState.records : [],
+    evidence_projections: loadEvidenceProjectionMemory(evidenceProjectionState),
   };
 }
 
@@ -805,6 +807,31 @@ async function readOptionalJson(filePath) {
     return null;
   }
   return JSON.parse(await readFile(filePath, "utf8"));
+}
+
+function loadEvidenceProjectionMemory(state) {
+  const rows = [];
+  for (const artifact of normalizeCollection(state?.artifacts)) {
+    for (const summary of normalizeCollection(artifact?.summaries)) {
+      rows.push({
+        kind: "evidence_projection",
+        source_path: "state/evidence-projections.json",
+        artifact_id: Number(artifact?.artifact_id ?? artifact?.id ?? 0) || null,
+        lane: firstString(summary?.lane),
+        date: firstString(summary?.packet_created_at) || firstString(artifact?.created_at),
+        title: firstString(summary?.summary) || `${firstString(summary?.lane) || "unknown-lane"} evidence projection`,
+        summary: firstString(summary?.summary) || null,
+        target_repo: firstString(summary?.target_repo),
+        subject_locator: firstString(summary?.subject_locator),
+        receipt_id: firstString(summary?.receipt_id) || null,
+        objective_fingerprint: firstString(summary?.objective_fingerprint) || null,
+        promotion_scope: firstString(summary?.promotion_scope) || "public",
+        excerpt: firstString(summary?.summary).slice(0, 280),
+      });
+    }
+  }
+
+  return rows.sort((left, right) => String(right.date).localeCompare(String(left.date)));
 }
 
 function buildMaintenanceOpportunity({ lane, repo, dossiers, memory, now, title }) {
@@ -1525,6 +1552,15 @@ function findRelevantMemory(memory, subjectLocator, targetRepo, lane) {
     }
     return false;
   });
+  const evidenceMemory = normalizeCollection(memory?.evidence_projections).filter((entry) => {
+    if (entry.subject_locator && entry.subject_locator === subjectLocator) {
+      return true;
+    }
+    if (entry.target_repo && entry.target_repo === targetRepo && entry.lane === lane) {
+      return true;
+    }
+    return false;
+  });
   const threadTeaching = (memory.thread_teaching ?? []).filter((entry) => {
     const record = entry?.thread_teaching_record ?? entry;
     if (record?.subject_locator && record.subject_locator === subjectLocator) {
@@ -1538,10 +1574,19 @@ function findRelevantMemory(memory, subjectLocator, targetRepo, lane) {
     }
     return false;
   });
-  return [...markdownMemory, ...threadTeaching];
+  return dedupeMemoryEntries([...markdownMemory, ...evidenceMemory, ...threadTeaching]);
 }
 
 function findLatestLaneDate(memory, lane) {
+  const evidenceDates = normalizeCollection(memory?.evidence_projections)
+    .filter((entry) => entry.lane === lane)
+    .map((entry) => entry.date)
+    .filter(Boolean)
+    .sort();
+  if (evidenceDates.length > 0) {
+    return evidenceDates.at(-1);
+  }
+
   return [...memory.history, ...memory.reflections]
     .filter((entry) => entry.lane === lane || entry.title.toLowerCase().includes(lane))
     .map((entry) => entry.date)
@@ -1551,11 +1596,39 @@ function findLatestLaneDate(memory, lane) {
 }
 
 function countRecentLaneExecutions(memory, lane, limit = 6) {
+  const evidenceRows = normalizeCollection(memory?.evidence_projections)
+    .filter((entry) => entry.lane === lane)
+    .sort((left, right) => String(right.date).localeCompare(String(left.date)))
+    .slice(0, limit);
+  if (evidenceRows.length > 0) {
+    return evidenceRows.length;
+  }
+
   return [...memory.history, ...memory.reflections]
     .filter((entry) => entry.lane === lane)
     .sort((left, right) => String(right.date).localeCompare(String(left.date)))
     .slice(0, limit)
     .length;
+}
+
+function dedupeMemoryEntries(entries) {
+  const seen = new Set();
+  const deduped = [];
+  for (const entry of entries) {
+    const key = memoryEntryKey(entry);
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+    deduped.push(entry);
+  }
+  return deduped;
+}
+
+function memoryEntryKey(entry) {
+  return firstString(entry?.receipt_id)
+    || firstString(entry?.path)
+    || `${firstString(entry?.source_path)}::${firstString(entry?.subject_locator)}::${firstString(entry?.lane)}::${firstString(entry?.date)}::${firstString(entry?.summary)}`;
 }
 
 function unique(values) {

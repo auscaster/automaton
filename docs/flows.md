@@ -34,11 +34,19 @@ This lane has two entry modes:
 This lane is the only repo-owned evidence projection lane.
 
 It downloads uploaded workflow artifacts from `issue-triage` and `skill-lab`,
-rebuilds repo-owned `history/`, `reflections/`, and target dossiers from those
-canonical artifacts, records the processed artifact ids and projection groups
-in `state/evidence-projections.json`, dedupes repeated retries onto one latest
+records the processed artifact ids and projection groups in
+`state/evidence-projections.json`, dedupes repeated retries onto one latest
 projection per bounded objective, and updates one rolling draft PR instead of
 spawning one PR per event.
+
+Public projection is narrower than runtime memory:
+
+- `state/evidence-projections.json` keeps the broad artifact-backed runtime and
+  training projection
+- only durable or teaching-bearing records are promoted into `history/`,
+  `reflections/`, and target dossiers
+- generic low-signal rows such as bare `lane finished with success` completions
+  stay in evidence state only so the rolling PR remains compact
 
 The rolling branch is reset from `main` on every derive run, then rebuilt from
 artifact evidence and force-pushed as a derived review surface. The PR body and

@@ -126,11 +126,11 @@ That progression should be gradual:
   only after replay and public-value gates pass
 - `issue-triage` and `skill-lab` emit canonical promotion packets inside
   uploaded workflow artifacts rather than mutating repo-owned memory directly
-- `evidence-projection-derive` rebuilds repo-owned `history/`, `reflections/`,
-  target dossier outcomes, and `state/evidence-projections.json` from those
-  artifacts, suppresses repeated retries onto one latest projection per bounded
-  objective, and keeps that work on one rolling draft PR with a current
-  latest-batch summary
+- `evidence-projection-derive` rebuilds `state/evidence-projections.json` from
+  those artifacts, suppresses repeated retries onto one latest projection per
+  bounded objective, and promotes only durable or teaching-bearing records into
+  repo-owned `history/`, `reflections/`, and target dossier outcomes while
+  keeping that work on one rolling draft PR with a current latest-batch summary
 - generated derived-state refresh PRs are review surfaces and are not fed back
   into PR-mode `issue-triage`
 - `fix-pr` turns one bounded bugfix request into a verified draft PR through
@@ -176,8 +176,9 @@ the canonical human-authored provider-thread evidence layer, while
 `state/thread-teaching.json` is a rebuildable derived cache and policy/context
 projection for runtime context and training. Repo-owned public memory now
 follows the same pattern: uploaded workflow artifacts stay canonical, while
-`state/evidence-projections.json`, `history/`, `reflections/`, and target
-outcome summaries are the reviewable projections derived from that evidence.
+`state/evidence-projections.json` holds the broad runtime and training
+projection derived from that evidence, while `history/`, `reflections/`, and
+target outcome summaries remain the compact durable subset worth public review.
 
 ## Remaining Gap
 

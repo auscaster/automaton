@@ -680,7 +680,10 @@ That means:
   collaboration issues as the durable record
 - `evidence-projection-derive` may refresh learned-state, public-history, and
   reflection surfaces, but only as a compact derived projection over canonical
-  artifacts and only through one rolling draft PR
+  artifacts, with broad runtime and training rows retained in
+  `state/evidence-projections.json` and only durable public rows promoted into
+  `history/`, `reflections/`, and target dossiers, and only through one
+  rolling draft PR
 - `docs-pr` may touch docs/public-face surfaces, but not doctrine or learned-state
 - `fix-pr` may touch runtime surfaces, but not doctrine or learned-state
 

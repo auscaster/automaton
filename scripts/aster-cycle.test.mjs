@@ -646,6 +646,90 @@ test("scoreOpportunities enforces cooldowns from target dossiers", async () => {
   assert.match(scored[0].veto_reasons.join(","), /cooldown/);
 });
 
+test("scoreOpportunities uses evidence projection state for runtime memory counts", () => {
+  const policy = {
+    weights: {
+      stranger_value: 0.24,
+      proof_strength: 0.24,
+      compounding_value: 0.19,
+      tractability: 0.16,
+      novelty: 0.09,
+      maintenance_efficiency: 0.08,
+    },
+    thresholds: {
+      stranger_value_min: 0.6,
+      proof_strength_min: 0.7,
+      minimum_select_score: 0.68,
+    },
+    cooldown_hours: {
+      success: 72,
+      ignored: 168,
+      rejected: 504,
+      failed: 24,
+    },
+  };
+
+  const opportunity = {
+    id: "issue-memory-check",
+    lane: "issue-triage",
+    source: "github_issue",
+    title: "docs: clarify command",
+    summary: "docs: clarify command",
+    subject_locator: "nilstate/aster#issue/10",
+    target_repo: "nilstate/aster",
+    is_external: true,
+    body_length: 120,
+    stale_days: 5,
+    age_days: 5,
+  };
+
+  const [withEvidence] = scoreOpportunities({
+    opportunities: [opportunity],
+    dossiers: {},
+    memory: {
+      history: [],
+      reflections: [],
+      thread_teaching: [],
+      evidence_projections: [
+        {
+          lane: "issue-triage",
+          date: "2026-04-16T11:00:00Z",
+          target_repo: "nilstate/aster",
+          subject_locator: "nilstate/aster#issue/10",
+          summary: "previous bounded triage",
+          receipt_id: "rcpt_prev",
+        },
+        {
+          lane: "issue-triage",
+          date: "2026-04-16T10:00:00Z",
+          target_repo: "nilstate/aster",
+          subject_locator: "nilstate/aster#issue/9",
+          summary: "older triage",
+          receipt_id: "rcpt_older",
+        },
+      ],
+    },
+    policy,
+    now: new Date("2026-04-16T12:00:00Z"),
+  });
+
+  const [withoutEvidence] = scoreOpportunities({
+    opportunities: [opportunity],
+    dossiers: {},
+    memory: {
+      history: [],
+      reflections: [],
+      thread_teaching: [],
+      evidence_projections: [],
+    },
+    policy,
+    now: new Date("2026-04-16T12:00:00Z"),
+  });
+
+  assert.ok(withEvidence.metrics.novelty < withoutEvidence.metrics.novelty);
+  assert.ok(withEvidence.score < withoutEvidence.score);
+});
+
 test("scoreOpportunities uses dossier current opportunities to boost lane fit", () => {
   const policy = {
     weights: {

@@ -139,7 +139,7 @@ export async function deriveEvidenceProjections(options = {}, helpers = {}) {
   const selection = selectProjectionCandidates(allCandidates);
   await replaySelectedPromotions({
     repoRoot,
-    candidates: selection.selected,
+    candidates: selection.publicSelected,
   });
 
   const applied = selection.selected
@@ -175,6 +175,12 @@ export async function deriveEvidenceProjections(options = {}, helpers = {}) {
       selected_artifact_id: group.selected_artifact_id,
       selected_receipt_id: group.selected_receipt_id,
       selected_summary: group.selected_summary,
+      selected_promotion_scope: group.selected_promotion_scope,
+      public_selected_artifact_id: group.public_selected_artifact_id,
+      public_selected_receipt_id: group.public_selected_receipt_id,
+      public_selected_summary: group.public_selected_summary,
+      public_selected_promotion_scope: group.public_selected_promotion_scope,
+      public_projection_reasons: group.public_projection_reasons,
       suppressed_artifact_ids: group.suppressed_artifact_ids,
     })),
   };
@@ -213,6 +219,7 @@ async function buildProjectionCandidate({ artifact, repoRoot, summaryPath }) {
   const summary = JSON.parse(await readFile(summaryPath, "utf8"));
   const promotionOutputs = resolvePromotionOutputs(summary?.promotion_outputs, summaryPath);
   const packet = JSON.parse(await readFile(promotionOutputs.packet_path, "utf8"));
+  const promotionClassification = classifyPromotionScope(packet);
   const reflectionPath = path.relative(repoRoot, path.join(repoRoot, "reflections", path.basename(promotionOutputs.reflection_path))).replaceAll(path.sep, "/");
   const historyPath = path.relative(
     repoRoot,
@@ -246,6 +253,8 @@ async function buildProjectionCandidate({ artifact, repoRoot, summaryPath }) {
     reflection_path: reflectionPath,
     history_path: historyPath,
     target_dossier_path: targetDossierPath,
+    promotion_scope: promotionClassification.scope,
+    public_projection_reasons: promotionClassification.reasons,
   };
 }
 
@@ -259,14 +268,19 @@ export function selectProjectionCandidates(candidates) {
   }
 
   const selected = [];
+  const publicSelected = [];
   const suppressed = [];
   const groups = [];
 
   for (const [projectionKey, entries] of grouped.entries()) {
     const ordered = [...entries].sort(compareProjectionCandidatePreference);
     const winner = ordered[0];
+    const publicWinner = ordered.find((entry) => isPublicProjectionScope(entry?.promotion_scope)) ?? null;
     const suppressedEntries = ordered.slice(1);
     selected.push(winner);
+    if (publicWinner) {
+      publicSelected.push(publicWinner);
+    }
     suppressed.push(
       ...suppressedEntries.map((entry) => ({
         ...entry,
@@ -284,12 +298,21 @@ export function selectProjectionCandidates(candidates) {
       selected_artifact_id: winner.artifact_id,
       selected_receipt_id: winner.receipt_id,
       selected_summary: winner.summary,
+      selected_promotion_scope: winner.promotion_scope,
+      public_selected_artifact_id: publicWinner?.artifact_id ?? null,
+      public_selected_receipt_id: publicWinner?.receipt_id ?? null,
+      public_selected_summary: publicWinner?.summary ?? null,
+      public_selected_promotion_scope: publicWinner?.promotion_scope ?? null,
+      public_projection_reasons: Array.isArray(publicWinner?.public_projection_reasons)
+        ? publicWinner.public_projection_reasons
+        : [],
       suppressed_artifact_ids: suppressedEntries.map((entry) => entry.artifact_id),
     });
   }
 
   return {
     selected: selected.sort(compareProjectionCandidateChronology),
+    publicSelected: publicSelected.sort(compareProjectionCandidateChronology),
     suppressed,
     groups: groups.sort((left, right) => left.projection_key.localeCompare(right.projection_key)),
   };
@@ -300,6 +323,7 @@ async function replaySelectedPromotions({ repoRoot, candidates }) {
     await applyAsterPromotions({
       repoRoot,
       summary: candidate.summary_path,
+      promotionScope: candidate.promotion_scope,
     });
   }
 }
@@ -326,6 +350,10 @@ function buildProcessedArtifactRecord(artifact, candidates) {
       reflection_path: entry.reflection_path,
       history_path: entry.history_path,
       target_dossier_path: entry.target_dossier_path,
+      promotion_scope: entry.promotion_scope,
+      public_projection_reasons: Array.isArray(entry.public_projection_reasons)
+        ? entry.public_projection_reasons
+        : [],
     })),
   };
 }
@@ -348,6 +376,10 @@ function buildAppliedSummaryReportRecord(candidate) {
     reflection_path: candidate.reflection_path,
     history_path: candidate.history_path,
     target_dossier_path: candidate.target_dossier_path,
+    promotion_scope: candidate.promotion_scope,
+    public_projection_reasons: Array.isArray(candidate.public_projection_reasons)
+      ? candidate.public_projection_reasons
+      : [],
   };
 }
 
@@ -368,6 +400,10 @@ function buildSuppressedSummaryReportRecord(candidate) {
     suppression_reason: candidate.suppression_reason,
     superseded_by_artifact_id: candidate.superseded_by_artifact_id,
     superseded_by_receipt_id: candidate.superseded_by_receipt_id,
+    promotion_scope: candidate.promotion_scope,
+    public_projection_reasons: Array.isArray(candidate.public_projection_reasons)
+      ? candidate.public_projection_reasons
+      : [],
   };
 }
 
@@ -396,6 +432,8 @@ function buildLatestBatchSummary({
     suppressed_summaries: normalizeCollection(suppressed).length,
     skipped_artifacts: normalizeCollection(skipped).length,
     error_count: normalizeCollection(errors).length,
+    public_projection_groups: normalizeCollection(applied).filter((entry) => isPublicProjectionScope(entry?.promotion_scope)).length,
+    state_only_projection_groups: normalizeCollection(applied).filter((entry) => !isPublicProjectionScope(entry?.promotion_scope)).length,
     touched_targets: uniqueStrings(
       normalizeCollection(applied)
         .map((entry) => firstString(entry?.target_repo))
@@ -439,6 +477,8 @@ export function renderLatestBatchMarkdown(summary) {
     `- Replayed projection groups: \`${Number(summary?.replayed_projection_groups ?? 0)}\``,
     `- Newly applied summaries: \`${Number(summary?.applied_summaries ?? 0)}\``,
     `- Newly suppressed summaries: \`${Number(summary?.suppressed_summaries ?? 0)}\``,
+    `- Public projection summaries: \`${Number(summary?.public_projection_groups ?? 0)}\``,
+    `- State-only summaries: \`${Number(summary?.state_only_projection_groups ?? 0)}\``,
     `- Skipped artifacts: \`${Number(summary?.skipped_artifacts ?? 0)}\``,
     `- Errors: \`${Number(summary?.error_count ?? 0)}\``,
   );
@@ -664,6 +704,64 @@ function summarizeReasonCounts(entries, field) {
     counts[reason] = (counts[reason] ?? 0) + 1;
   }
   return counts;
+}
+
+function classifyPromotionScope(packet) {
+  const reasons = [];
+  if (firstString(packet?.objective_fingerprint)) {
+    reasons.push("objective_fingerprint");
+  }
+  if (hasThreadTeaching(packet)) {
+    reasons.push("thread_teaching");
+  }
+  if (hasGateDecisions(packet)) {
+    reasons.push("gate_decisions");
+  }
+  if (hasDurableProjectionSummary(packet?.summary)) {
+    reasons.push("durable_summary");
+  }
+
+  if (reasons.length > 0) {
+    return {
+      scope: "public",
+      reasons,
+    };
+  }
+
+  return {
+    scope: "state_only",
+    reasons: [],
+  };
+}
+
+function hasThreadTeaching(packet) {
+  return normalizeCollection(packet?.thread_teaching_context?.records)
+    .some((record) => firstString(record?.summary) || firstString(record?.kind));
+}
+
+function hasGateDecisions(packet) {
+  return normalizeCollection(packet?.gate_decisions)
+    .some((decision) => firstString(decision?.gate_id) || firstString(decision?.authorization_reason) || firstString(decision?.gate_reason));
+}
+
+function hasDurableProjectionSummary(value) {
+  const summary = normalizeProjectionSummary(value);
+  if (!summary) {
+    return false;
+  }
+  return ![
+    "lane finished with success",
+    "lane finished with completed",
+    "lane finished with needs-resolution",
+    "lane finished with failed",
+    "lane finished with error",
+    "lane finished with unknown",
+    "operator run completed",
+  ].includes(summary);
+}
+
+function isPublicProjectionScope(value) {
+  return firstString(value) === "public";
 }
 
 function matchesArtifactPrefix(name, prefixes) {

@@ -48,16 +48,19 @@ This is the live run catalog for `aster`.
 
 - trigger: scheduled every six hours, plus manual dispatch
 - command: `node scripts/derive-evidence-projections.mjs`
-- purpose: rebuild repo-owned `history/`, `reflections/`, target dossier recent
-  outcomes, and `state/evidence-projections.json` from uploaded GitHub Actions
-  artifacts instead of mutating those surfaces inline during issue-triage,
-  while suppressing repeated retries onto one latest projection per bounded
+- purpose: rebuild `state/evidence-projections.json` from uploaded GitHub
+  Actions artifacts instead of mutating repo-owned memory inline during
+  issue-triage, promote only durable or teaching-bearing rows into
+  repo-owned `history/`, `reflections/`, and target dossier recent outcomes,
+  and suppress repeated retries onto one latest projection per bounded
   objective
 - output: rolling draft PR, projection state file, artifact-derive report,
   latest-batch summary files, and uploaded derive artifacts
 - review surface: the branch is reset from `main` and rebuilt on every run, so
   the PR stays one rolling derived review surface rather than an append-only
   queue of branch-local merges
+- note: generic low-signal completions remain in state-only projection for
+  runtime context and training
 
 ### `fix-pr`
 
