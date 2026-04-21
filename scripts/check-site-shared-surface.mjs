@@ -5,11 +5,6 @@ import { fileURLToPath } from "node:url";
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultRepoRoot = path.resolve(scriptDir, "..");
 
-const allowedRunxImportPrefixes = [
-  "@runx-tokens",
-  "@runx-ui",
-];
-
 const forbiddenRunxTargets = [
   "api",
   "auth",
@@ -25,22 +20,23 @@ export async function assertAsterSiteSharedSurface(options = {}) {
   const repoRoot = path.resolve(options.repoRoot ?? defaultRepoRoot);
   const siteRoot = path.join(repoRoot, "site");
   const astroConfigPath = path.join(siteRoot, "astro.config.mjs");
+  const baseLayoutPath = path.join(siteRoot, "src", "layouts", "BaseLayout.astro");
+  const foundationPath = path.join(siteRoot, "src", "styles", "foundation.css");
   const violations = [];
 
   const astroConfig = await readFile(astroConfigPath, "utf8");
-  if (!astroConfig.includes('path.join(runxPackagesPath, "tokens"')) {
-    violations.push("site/astro.config.mjs must alias the shared runx tokens package explicitly.");
+  if (/["']@runx(?:-|\b)/u.test(astroConfig) || /runxPackagesPath/u.test(astroConfig)) {
+    violations.push("site/astro.config.mjs must not alias runx packages or monorepo paths.");
   }
-  if (!astroConfig.includes('path.join(runxPackagesPath, "ui"')) {
-    violations.push("site/astro.config.mjs must alias the shared runx ui package explicitly.");
+
+  const baseLayout = await readFile(baseLayoutPath, "utf8");
+  if (!baseLayout.includes('import "../styles/foundation.css";')) {
+    violations.push("site/src/layouts/BaseLayout.astro must import the repo-owned foundation stylesheet.");
   }
-  for (const target of forbiddenRunxTargets) {
-    if (astroConfig.includes(`path.join(runxPackagesPath, "${target}"`)) {
-      violations.push(`site/astro.config.mjs must not alias runx internal package '${target}'.`);
-    }
-  }
-  if (astroConfig.includes("apps/web")) {
-    violations.push("site/astro.config.mjs must not alias runx app code.");
+
+  const foundation = await readFile(foundationPath, "utf8");
+  if (!foundation.includes("@layer reset, tokens, base, effects, components, pages, utilities;")) {
+    violations.push("site/src/styles/foundation.css must declare the shared cascade layer order.");
   }
 
   const siteFiles = await collectSiteSourceFiles(path.join(siteRoot, "src"));
@@ -94,14 +90,15 @@ function parseImportSpecifiers(source) {
 
 function describeForbiddenSpecifier(specifier) {
   if (specifier.startsWith("@runx") || specifier.startsWith("@runx-")) {
-    const allowed = allowedRunxImportPrefixes.some((prefix) => specifier === prefix || specifier.startsWith(`${prefix}/`));
-    if (!allowed) {
-      return "only the shared @runx-tokens and @runx-ui surfaces are allowed.";
-    }
+    return "aster site imports must be repo-owned; runx package aliases are not allowed.";
   }
 
   if (/runx\/cloud\/apps\/web/u.test(specifier)) {
     return "runx web app code is not a shared surface.";
+  }
+
+  if (/runx(?:\/cloud)?\/packages\/(?:tokens|ui)(?:\/|$)/u.test(specifier)) {
+    return "aster site must vendor its build-time CSS surface instead of importing runx packages directly.";
   }
 
   if (new RegExp(`runx(?:/cloud)?/packages/(?:${forbiddenRunxTargets.join("|")})(?:/|$)`, "u").test(specifier)) {
