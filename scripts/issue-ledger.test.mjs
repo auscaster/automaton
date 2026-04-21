@@ -40,10 +40,10 @@ test("buildIssueLedgerPacket renders a living issue ledger from trusted human co
         body: [
           "<!-- aster:thread-teaching-record -->",
           "Kind: approval",
-          "Summary: One draft proposal refresh is approved.",
+          "Summary: One skill proposal draft PR refresh is approved.",
           "Recorded By: kam",
           "Applies To: skill-lab.*",
-          "Decision: skill-lab.publish = allow | keep it draft-only",
+          "Decision: skill-lab.publish = allow | draft PR refresh is approved",
         ].join("\n"),
         html_url: "https://github.com/nilstate/aster/issues/110#issuecomment-3",
         created_at: "2026-04-21T08:10:00Z",

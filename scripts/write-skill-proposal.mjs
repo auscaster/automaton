@@ -68,6 +68,7 @@ export function buildSkillProposalMarkdown({ payload, title, issueUrl, issuePack
     `- Work issue URL: ${issueUrl ?? "n/a"}`,
     ledgerRevision ? `- Ledger revision: \`${ledgerRevision}\`` : null,
     "- Maintainer amendments stay on the same work issue thread.",
+    "- Draft PR refresh requires `skill-lab.publish` authorization on the same work issue.",
     "",
     "## Objective",
     "",

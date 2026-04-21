@@ -30,3 +30,15 @@ test("buildSkillLabComment reports a failed run consistently", () => {
 
   assert.match(comment, /Status: `run_failed`/);
 });
+
+test("buildSkillLabComment reports proposal_refreshed when publish is not requested", () => {
+  const comment = buildSkillLabComment({
+    objective: "Add an issue-ledger distillation skill",
+    workflowStatus: "success",
+    publish: {
+      status: "not_requested",
+    },
+  });
+
+  assert.match(comment, /Status: `proposal_refreshed`/);
+});

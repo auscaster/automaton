@@ -33,11 +33,12 @@ This is the live run catalog for `aster`.
   maintainer issue comments on those work issues
 - command: `runx skill <runx>/skills/objective-to-skill`
 - purpose: turn a proposed new capability into a concrete skill package
-  proposal, materialize it under `docs/skill-proposals/`, refresh one draft PR,
-  and keep one rolling machine comment on the same work issue
+  proposal, materialize it under `docs/skill-proposals/`, keep one rolling
+  machine comment on the same work issue, and refresh one draft PR only after
+  the same thread authorizes `skill-lab.publish`
 - output: proposal markdown, raw packet JSON, receipts, promotion packet
-  drafts inside uploaded artifacts, draft PR, rolling issue status comment, and
-  the bounded issue-ledger packet
+  drafts inside uploaded artifacts, optional draft PR, rolling issue status
+  comment, and the bounded issue-ledger packet
 
 ### `evidence-projection-derive`
 

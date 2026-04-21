@@ -70,8 +70,9 @@ The governing philosophy is:
   opens a draft `runx/*` PR from one work issue ledger
 - `skill-lab`: a skill proposal issue runs through
   `objective-to-skill`, materializes a proposal in `docs/skill-proposals/`,
-  refreshes one draft PR, and keeps one rolling machine comment attached to the
-  same issue ledger
+  keeps one rolling machine comment attached to the same issue ledger, and
+  refreshes one draft PR only after the same work issue authorizes
+  `skill-lab.publish`
 - `skill-upstream`: prepares and validates a portable upstream `SKILL.md`
   contribution packet, keeps the proposal state on one work issue ledger, and
   can open a draft PR against the target repo from that same thread

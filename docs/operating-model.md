@@ -128,9 +128,9 @@ That progression should be gradual:
   uploaded workflow artifacts rather than mutating repo-owned memory directly
 - `skill-lab` follows the same one-thread model: the work issue is the living
   ledger for skill proposal work, and trusted maintainer replies become
-  maintainer amendments that
-  retrigger the lane, the proposal draft PR is refreshed from that work
-  ledger, and one rolling machine comment stays attached to the issue
+  maintainer amendments that retrigger the lane. The proposal draft PR is
+  refreshed from that work ledger only after the same thread authorizes
+  `skill-lab.publish`, and one rolling machine comment stays attached to the issue
 - `fix-pr`, `docs-pr`, and `skill-upstream` follow that same one-thread model:
   the work issue carries the initial request, maintainer amendments, publish
   authorization, and rolling machine status while the lane refreshes one draft

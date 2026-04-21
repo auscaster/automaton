@@ -47,6 +47,7 @@ test("buildSkillProposalMarkdown preserves issue rationale and evidence", () => 
   assert.match(markdown, /## Work Ledger/);
   assert.match(markdown, /Work issue: `nilstate\/aster#42`/);
   assert.match(markdown, /Ledger revision: `deadbeefcafebabe`/);
+  assert.match(markdown, /skill-lab\.publish/);
   assert.match(markdown, /## Why It Matters/);
   assert.match(markdown, /Issue review should train the operator\./);
   assert.match(markdown, /## Evidence/);

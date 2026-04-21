@@ -205,6 +205,25 @@ jobs:
         run: |
           jq -n '{commands:["npm run docs:ci"]}' > .artifacts/skill-lab/validation.json
 
+      - name: Check work issue authorization
+        if: ${{ steps.preflight.outputs.enabled == 'true' }}
+        id: gate
+        run: |
+          node scripts/check-thread-teaching-gate.mjs \
+            --repo "${{ github.repository }}" \
+            --issue "${{ steps.issue.outputs.number }}" \
+            --target-repo "${{ github.repository }}" \
+            --subject-locator "${{ github.repository }}#issue/${{ steps.issue.outputs.number }}" \
+            --applies-to "skill-lab.publish" \
+            --output .artifacts/skill-lab/thread-teaching-gate.json
+          if jq -e '.allowed == true' .artifacts/skill-lab/thread-teaching-gate.json > /dev/null; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+            echo "Skill proposal refreshed without draft PR publication." >> "$GITHUB_STEP_SUMMARY"
+            echo "Reply in the same work issue with a thread-teaching record that authorizes \`skill-lab.publish\` to refresh the draft PR." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Write PR body
         if: ${{ steps.preflight.outputs.enabled == 'true' }}
         run: |
@@ -223,10 +242,14 @@ jobs:
 
           - \`npm run docs:ci\`
           - receipts uploaded with this workflow run
+
+          ## Publication
+
+          - Draft PR refresh is allowed only when the same work issue authorizes \`skill-lab.publish\`
           EOF
 
       - name: Publish draft PR
-        if: ${{ steps.preflight.outputs.enabled == 'true' }}
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.gate.outputs.allowed == 'true' }}
         run: |
           node scripts/publish-runx-pr.mjs \
             --repo "${{ github.repository }}" \
@@ -241,8 +264,16 @@ jobs:
             > .artifacts/skill-lab/publish.json
           cat .artifacts/skill-lab/publish.json
 
+      - name: Mark proposal-only run
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.gate.outputs.allowed != 'true' }}
+        run: |
+          jq -n '{
+            status: "not_requested",
+            reason: "skill-lab.publish gate not granted yet"
+          }' > .artifacts/skill-lab/publish.json
+
       - name: Evaluate generated PR
-        if: ${{ steps.preflight.outputs.enabled == 'true' && hashFiles('.artifacts/skill-lab/publish.json') != '' }}
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.gate.outputs.allowed == 'true' && hashFiles('.artifacts/skill-lab/publish.json') != '' }}
         run: |
           node scripts/evaluate-generated-pr.mjs \
             --publish ".artifacts/skill-lab/publish.json" \
@@ -251,7 +282,7 @@ jobs:
             --output ".artifacts/skill-lab/pr-eval.json"
 
       - name: Queue issue-triage on draft PR
-        if: ${{ steps.preflight.outputs.enabled == 'true' && hashFiles('.artifacts/skill-lab/publish.json') != '' }}
+        if: ${{ steps.preflight.outputs.enabled == 'true' && steps.gate.outputs.allowed == 'true' && hashFiles('.artifacts/skill-lab/publish.json') != '' }}
         run: |
           if [ "$(jq -r '.status' .artifacts/skill-lab/publish.json)" != "published" ]; then
             exit 0
@@ -286,9 +317,12 @@ jobs:
           RUNX_PUBLIC_EVIDENCE_TOKEN: ${{ secrets.RUNX_PUBLIC_EVIDENCE_TOKEN }}
         run: |
           STATUS="${{ job.status }}"
-          if [ "$STATUS" = "success" ]; then
-            TITLE="tested a skill in the lab"
-            SUMMARY="ran skill-lab evaluation and recorded trust findings"
+          if [ "$STATUS" = "success" ] && [ "${{ steps.gate.outputs.allowed }}" = "true" ]; then
+            TITLE="refreshed a skill proposal draft PR"
+            SUMMARY="ran skill-lab from the work ledger and refreshed the rolling draft PR"
+          elif [ "$STATUS" = "success" ]; then
+            TITLE="refreshed a skill proposal"
+            SUMMARY="ran skill-lab from the work ledger without opening a draft PR"
           else
             TITLE="skill-lab evaluation failed"
             SUMMARY="skill-lab lane failed during execution"

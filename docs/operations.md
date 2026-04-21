@@ -92,9 +92,9 @@ Thread teaching is the canonical human-teaching layer:
 - public comment quality must clear the Kam-voice bar before posting
 - issue triage writes comments only through the dedicated workflow
 - work-specific approval or teaching lives as a comment on the same work issue
-- docs PRs, fix PRs, and upstream skill publication still require explicit
-  publish authorization in thread teaching
-- skill-lab opens draft PRs only
+- docs PRs, fix PRs, skill-lab draft PR publication, and upstream skill
+  publication still require explicit publish authorization in thread teaching
+- skill-lab opens draft PRs only after `skill-lab.publish` is authorized
 - skill-upstream opens draft PRs only, and upstream changes stay limited to
   portable `SKILL.md` unless a maintainer explicitly authorizes more
 - generated PR policy enforcement keeps `runx/*` PRs draft-only and explicitly
