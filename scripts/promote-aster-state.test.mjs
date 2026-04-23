@@ -48,14 +48,14 @@ test("buildPromotionDrafts creates reflection and history drafts", () => {
     contextBundle: {
       objective_fingerprint: "issue:aster-101",
       subject: {
-        locator: "nilstate/aster#issue/101",
+        locator: "runxhq/aster#issue/101",
       },
       thread_teaching_context: {
         records: [
           {
             kind: "approval",
             summary: "Keep the action reviewable and bounded.",
-            source_url: "https://github.com/nilstate/aster/issues/101#issuecomment-1",
+            source_url: "https://github.com/runxhq/aster/issues/101#issuecomment-1",
             recorded_by: "kam",
             notes: ["Prefer a draft PR over a direct mutation."],
             invariants: ["Do not widen scope beyond docs."],

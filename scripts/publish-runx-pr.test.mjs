@@ -19,7 +19,7 @@ test("ensureRemoteLease fetches the remote automation branch before pushing", ()
   const runner = (command, args) => {
     calls.push([command, args]);
     if (args[0] === "ls-remote") {
-      return "abc123\trefs/heads/runx/issue-8-nilstate-aster-01\n";
+      return "abc123\trefs/heads/runx/issue-8-runxhq-aster-01\n";
     }
     if (args[0] === "fetch") {
       return "";
@@ -27,18 +27,18 @@ test("ensureRemoteLease fetches the remote automation branch before pushing", ()
     throw new Error(`unexpected command: ${command} ${args.join(" ")}`);
   };
 
-  const lease = ensureRemoteLease("runx/issue-8-nilstate-aster-01", runner);
+  const lease = ensureRemoteLease("runx/issue-8-runxhq-aster-01", runner);
 
   assert.equal(lease, "abc123");
   assert.deepEqual(calls, [
-    ["git", ["ls-remote", "--heads", "origin", "runx/issue-8-nilstate-aster-01"]],
+    ["git", ["ls-remote", "--heads", "origin", "runx/issue-8-runxhq-aster-01"]],
     [
       "git",
       [
         "fetch",
         "--no-tags",
         "origin",
-        "runx/issue-8-nilstate-aster-01:refs/remotes/origin/runx/issue-8-nilstate-aster-01",
+        "runx/issue-8-runxhq-aster-01:refs/remotes/origin/runx/issue-8-runxhq-aster-01",
       ],
     ],
   ]);
@@ -133,9 +133,9 @@ test("buildRemoteTrackingRef formats the origin tracking reference", () => {
 });
 
 test("buildPullRequestUpdateArgs uses the REST pull endpoint for existing PRs", () => {
-  assert.deepEqual(buildPullRequestUpdateArgs("nilstate/aster", 103), [
+  assert.deepEqual(buildPullRequestUpdateArgs("runxhq/aster", 103), [
     "api",
-    "repos/nilstate/aster/pulls/103",
+    "repos/runxhq/aster/pulls/103",
     "--method",
     "PATCH",
     "--input",
@@ -145,7 +145,7 @@ test("buildPullRequestUpdateArgs uses the REST pull endpoint for existing PRs", 
 
 test("buildClosePrArgs closes an existing draft PR and deletes the branch when requested", () => {
   assert.deepEqual(
-    buildClosePrArgs("nilstate/aster", 109, {
+    buildClosePrArgs("runxhq/aster", 109, {
       deleteBranch: true,
       comment: "semantic noop",
     }),
@@ -154,7 +154,7 @@ test("buildClosePrArgs closes an existing draft PR and deletes the branch when r
       "close",
       "109",
       "--repo",
-      "nilstate/aster",
+      "runxhq/aster",
       "--delete-branch",
       "--comment",
       "semantic noop",

@@ -1,8 +1,8 @@
 {
   "targets": [
     {
-      "target_id": "target-nilstate-aster",
-      "repo": "nilstate/aster",
+      "target_id": "target-runxhq-aster",
+      "repo": "runxhq/aster",
       "state": "active",
       "default_lanes": ["docs-pr", "proving-ground", "skill-lab"],
       "lifecycle": {
@@ -18,8 +18,8 @@
       }
     },
     {
-      "target_id": "target-nilstate-runx",
-      "repo": "nilstate/runx",
+      "target_id": "target-runxhq-runx",
+      "repo": "runxhq/runx",
       "state": "active",
       "default_lanes": ["issue-triage", "skill-upstream", "merge-watch"],
       "lifecycle": {
@@ -124,8 +124,8 @@
     },
     {
       "opportunity_id": "opp-aster-docs-refresh",
-      "target_id": "target-nilstate-aster",
-      "subject_locator": "nilstate/aster#docs/doctrine-home",
+      "target_id": "target-runxhq-aster",
+      "subject_locator": "runxhq/aster#docs/doctrine-home",
       "lane": "docs-pr",
       "source": "demo_bootstrap",
       "budget_bucket": "context_improvement",
@@ -213,7 +213,7 @@
         "approval_mode": "lane_preapproved",
         "requires_human_approval": false,
         "policy_basis": "deferred_below_selected_score",
-        "target_repo": "nilstate/aster"
+        "target_repo": "runxhq/aster"
       }
     },
     {
@@ -239,7 +239,7 @@
   "reflection_entries": [
     {
       "reflection_id": "refl-2026-04-17-attention",
-      "target_id": "target-nilstate-aster",
+      "target_id": "target-runxhq-aster",
       "summary": "Public comment lanes must earn the right to act. Attention cost is now a hard gating input, not a soft preference.",
       "outcome_status": "accepted",
       "recorded_at": "2026-04-17T10:18:00Z"
@@ -283,17 +283,17 @@
         "approval_mode": "lane_preapproved",
         "requires_human_approval": false,
         "policy_basis": "selected_after_portfolio_budget",
-        "target_repo": "nilstate/aster"
+        "target_repo": "runxhq/aster"
       },
       "dispatch": {
         "status": "dispatched",
         "workflow": "docs-pr",
         "ref": "main",
-        "target_repo": "nilstate/aster",
-        "subject_locator": "nilstate/aster#docs/doctrine-home",
+        "target_repo": "runxhq/aster",
+        "subject_locator": "runxhq/aster#docs/doctrine-home",
         "score": 0.67,
         "inputs": {
-          "target_repo": "nilstate/aster",
+          "target_repo": "runxhq/aster",
           "lane": "docs-pr"
         }
       },

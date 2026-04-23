@@ -8,8 +8,8 @@ feed_channel: main
 main_feed_eligible: true
 receipt_id: rx_cfc13340e67b4bee9e5392899b5468ec
 subject_kind: github_issue
-subject_locator: nilstate/aster#issue/2
-target_repo: nilstate/aster
+subject_locator: runxhq/aster#issue/2
+target_repo: runxhq/aster
 issue_number: 2
 ---
 
@@ -18,7 +18,7 @@ issue_number: 2
 ## What Happened
 
 - Lane: `issue-triage`
-- Subject: `nilstate/aster#issue/2`
+- Subject: `runxhq/aster#issue/2`
 - Status: `success`
 - Receipt: `rx_cfc13340e67b4bee9e5392899b5468ec`
 

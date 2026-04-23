@@ -29,13 +29,13 @@ test("buildPublishPlan derives lane-specific titles and branches", () => {
     lane: "docs-pr",
     requestTitle: "Clarify deploy docs",
     sourceId: "docs-pr-101",
-    targetRepo: "nilstate/aster",
+    targetRepo: "runxhq/aster",
   });
   const fixPlan = buildPublishPlan({
     lane: "fix-pr",
     requestTitle: "Fix activity ordering",
     sourceId: "fix-pr-202",
-    targetRepo: "nilstate/aster",
+    targetRepo: "runxhq/aster",
   });
 
   assert.match(docsPlan.branch, /^runx\/docs-pr-/);
@@ -50,11 +50,11 @@ test("buildLanePrBody includes lane guardrails and validation", () => {
     requestTitle: "Clarify deploy docs",
     requestBody: "Tighten the Pages deployment explanation.",
     sourceId: "docs-pr-101",
-    workIssueRepo: "nilstate/aster",
+    workIssueRepo: "runxhq/aster",
     workIssueNumber: "222",
-    workIssueUrl: "https://github.com/nilstate/aster/issues/222",
+    workIssueUrl: "https://github.com/runxhq/aster/issues/222",
     ledgerRevision: "deadbeefcafebabe",
-    targetRepo: "nilstate/aster",
+    targetRepo: "runxhq/aster",
     taskId: "docs-pr-clarify-deploy-docs",
     verificationProfile: "aster.site-ci",
     bootstrapCommands: ["npm --prefix site ci"],
@@ -65,7 +65,7 @@ test("buildLanePrBody includes lane guardrails and validation", () => {
   assert.match(body, /verification profile: `aster\.site-ci`/);
   assert.match(body, /`npm --prefix site ci`/);
   assert.match(body, /`npm run site:ci`/);
-  assert.match(body, /Work issue: `nilstate\/aster#222`/);
+  assert.match(body, /Work issue: `runxhq\/aster#222`/);
   assert.match(body, /Ledger revision: `deadbeefcafebabe`/);
   assert.match(body, /Lane Guardrails/);
 });

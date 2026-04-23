@@ -11,7 +11,7 @@ test("classifyRepoPath separates constitutional, learned, and public surfaces", 
   assert.equal(classifyRepoPath("doctrine/VOICE.md"), "doctrine");
   assert.equal(classifyRepoPath(".ai/specs/archive/issue-2.yaml"), "repo_meta");
   assert.equal(classifyRepoPath(".ai/reviews/issue-2.md"), "repo_meta");
-  assert.equal(classifyRepoPath("state/targets/nilstate-aster.md"), "learned_state");
+  assert.equal(classifyRepoPath("state/targets/runxhq-aster.md"), "learned_state");
   assert.equal(classifyRepoPath("history/2026-04-17-entry.md"), "public_history");
   assert.equal(classifyRepoPath("reflections/2026-04-17-note.md"), "reflections");
   assert.equal(classifyRepoPath("site/src/pages/index.astro"), "public_face");
@@ -35,8 +35,8 @@ test("summarizeChangeSurfaces groups files by surface", () => {
 test("evaluateLaneChangeSurfacePolicy blocks doctrine and learned-state writes for docs-pr", () => {
   const policy = evaluateLaneChangeSurfacePolicy({
     lane: "docs-pr",
-    repo: "nilstate/aster",
-    ownerRepo: "nilstate/aster",
+    repo: "runxhq/aster",
+    ownerRepo: "runxhq/aster",
     files: [
       "docs/architecture.md",
       "doctrine/AUTHORITY.md",
@@ -53,8 +53,8 @@ test("evaluateLaneChangeSurfacePolicy blocks doctrine and learned-state writes f
 test("evaluateLaneChangeSurfacePolicy allows bounded non-doctrine issue-triage publication surfaces", () => {
   const policy = evaluateLaneChangeSurfacePolicy({
     lane: "issue-triage",
-    repo: "nilstate/aster",
-    ownerRepo: "nilstate/aster",
+    repo: "runxhq/aster",
+    ownerRepo: "runxhq/aster",
     files: [
       ".ai/specs/archive/issue-2.yaml",
       ".ai/reviews/issue-2.md",
@@ -62,7 +62,7 @@ test("evaluateLaneChangeSurfacePolicy allows bounded non-doctrine issue-triage p
       "site/src/pages/index.astro",
       "scripts/run-issue-triage-workers.mjs",
       "src/lib/custom.txt",
-      "state/targets/nilstate-aster.md",
+      "state/targets/runxhq-aster.md",
       "history/2026-04-17-entry.md",
       "reflections/2026-04-17-reflection.md",
     ],
@@ -75,11 +75,11 @@ test("evaluateLaneChangeSurfacePolicy allows bounded non-doctrine issue-triage p
 test("evaluateLaneChangeSurfacePolicy allows evidence-projection-derive surfaces", () => {
   const policy = evaluateLaneChangeSurfacePolicy({
     lane: "evidence-projection-derive",
-    repo: "nilstate/aster",
-    ownerRepo: "nilstate/aster",
+    repo: "runxhq/aster",
+    ownerRepo: "runxhq/aster",
     files: [
       "state/evidence-projections.json",
-      "state/targets/nilstate-aster.md",
+      "state/targets/runxhq-aster.md",
       "history/2026-04-17-entry.md",
       "reflections/2026-04-17-reflection.md",
       "README.md",
@@ -93,8 +93,8 @@ test("evaluateLaneChangeSurfacePolicy allows evidence-projection-derive surfaces
 test("evaluateLaneChangeSurfacePolicy allows thread-teaching-derive to refresh learned state only", () => {
   const policy = evaluateLaneChangeSurfacePolicy({
     lane: "thread-teaching-derive",
-    repo: "nilstate/aster",
-    ownerRepo: "nilstate/aster",
+    repo: "runxhq/aster",
+    ownerRepo: "runxhq/aster",
     files: [
       "state/thread-teaching.json",
       "README.md",
@@ -109,7 +109,7 @@ test("evaluateLaneChangeSurfacePolicy reports only for external repos", () => {
   const policy = evaluateLaneChangeSurfacePolicy({
     lane: "fix-pr",
     repo: "vercel/next.js",
-    ownerRepo: "nilstate/aster",
+    ownerRepo: "runxhq/aster",
     files: ["docs/app-router.md", "src/app.ts"],
   });
 

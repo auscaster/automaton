@@ -19,7 +19,7 @@ const INVALID_BRANCH_FRAGMENT_PATTERN = /[ ~^:?*[\]\\]/;
 
 export function isPrereleaseEligibleTargetRepo(value) {
   const repo = firstString(value);
-  return Boolean(repo) && /^nilstate\/[a-z0-9._-]+$/i.test(repo);
+  return Boolean(repo) && /^runxhq\/[a-z0-9._-]+$/i.test(repo);
 }
 
 export function normalizeAutomationBranchName(value, label = "branch") {

@@ -53,7 +53,7 @@ test("isRetryableBridgeFailure ignores non-transport failures", () => {
 
 test("buildInlineRepoSnapshot keeps the prompt payload compact", () => {
   const snapshot = buildInlineRepoSnapshot({
-    target_repo: "nilstate/aster",
+    target_repo: "runxhq/aster",
     git: { branch: null, head: "abc123" },
     top_level_entries: Array.from({ length: 20 }, (_, index) => ({
       name: `entry-${index}`,
@@ -82,7 +82,7 @@ test("buildInlineRepoSnapshot keeps the prompt payload compact", () => {
 test("buildVerificationReport emits the canonical verification report shape", () => {
   const report = buildVerificationReport({
     reportId: "verification-101",
-    targetRepo: "nilstate/aster",
+    targetRepo: "runxhq/aster",
     verificationProfile: "aster.site-ci",
     status: "pass",
     bootstrapCommands: [
@@ -112,7 +112,7 @@ test("buildVerificationReport emits the canonical verification report shape", ()
 
 test("findExistingGeneratedIssuePr reuses the most recent open generated PR for the same issue", () => {
   const result = findExistingGeneratedIssuePr({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issueNumber: "12",
     runner(command, args) {
       assert.equal(command, "gh");
@@ -120,7 +120,7 @@ test("findExistingGeneratedIssuePr reuses the most recent open generated PR for 
         "pr",
         "list",
         "--repo",
-        "nilstate/aster",
+        "runxhq/aster",
         "--state",
         "open",
         "--limit",
@@ -132,24 +132,24 @@ test("findExistingGeneratedIssuePr reuses the most recent open generated PR for 
         {
           number: 40,
           title: "[runx] resolve issue #9 (01)",
-          url: "https://github.com/nilstate/aster/pull/40",
-          headRefName: "runx/issue-9-nilstate-aster-01",
+          url: "https://github.com/runxhq/aster/pull/40",
+          headRefName: "runx/issue-9-runxhq-aster-01",
           isDraft: true,
           updatedAt: "2026-04-21T04:00:00Z",
         },
         {
           number: 41,
           title: "[runx] resolve issue #12 (01)",
-          url: "https://github.com/nilstate/aster/pull/41",
-          headRefName: "runx/issue-12-nilstate-aster-01",
+          url: "https://github.com/runxhq/aster/pull/41",
+          headRefName: "runx/issue-12-runxhq-aster-01",
           isDraft: true,
           updatedAt: "2026-04-21T04:01:00Z",
         },
         {
           number: 42,
           title: "[runx] resolve issue #12 (02)",
-          url: "https://github.com/nilstate/aster/pull/42",
-          headRefName: "runx/issue-12-nilstate-aster-02",
+          url: "https://github.com/runxhq/aster/pull/42",
+          headRefName: "runx/issue-12-runxhq-aster-02",
           isDraft: true,
           updatedAt: "2026-04-21T04:05:00Z",
         },
@@ -158,5 +158,5 @@ test("findExistingGeneratedIssuePr reuses the most recent open generated PR for 
   });
 
   assert.equal(result?.number, 42);
-  assert.equal(result?.url, "https://github.com/nilstate/aster/pull/42");
+  assert.equal(result?.url, "https://github.com/runxhq/aster/pull/42");
 });

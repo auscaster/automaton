@@ -22,7 +22,7 @@ body:
     attributes:
       label: Target Repo
       description: Optional repo to target if this improvement is not for this repo.
-      placeholder: nilstate/aster
+      placeholder: runxhq/aster
   - type: textarea
     id: context
     attributes:

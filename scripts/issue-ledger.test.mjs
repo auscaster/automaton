@@ -10,12 +10,12 @@ import {
 
 test("buildIssueLedgerPacket renders a living issue ledger from trusted human comments", () => {
   const packet = buildIssueLedgerPacket({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issue: {
       number: 110,
       title: "[skill] Add an issue-ledger distillation skill",
       body: "Objective: Add a skill.\n\nWhy It Matters:\nTeach aster through the issue ledger.",
-      html_url: "https://github.com/nilstate/aster/issues/110",
+      html_url: "https://github.com/runxhq/aster/issues/110",
       user: { login: "kam" },
       author_association: "OWNER",
     },
@@ -23,7 +23,7 @@ test("buildIssueLedgerPacket renders a living issue ledger from trusted human co
       {
         id: 1,
         body: "Please keep the first pass proposal-only.",
-        html_url: "https://github.com/nilstate/aster/issues/110#issuecomment-1",
+        html_url: "https://github.com/runxhq/aster/issues/110#issuecomment-1",
         created_at: "2026-04-21T08:00:00Z",
         user: { login: "kam", type: "User" },
         author_association: "OWNER",
@@ -31,7 +31,7 @@ test("buildIssueLedgerPacket renders a living issue ledger from trusted human co
       {
         id: 2,
         body: "Thanks, following.",
-        html_url: "https://github.com/nilstate/aster/issues/110#issuecomment-2",
+        html_url: "https://github.com/runxhq/aster/issues/110#issuecomment-2",
         created_at: "2026-04-21T08:05:00Z",
         user: { login: "someone", type: "User" },
         author_association: "NONE",
@@ -46,7 +46,7 @@ test("buildIssueLedgerPacket renders a living issue ledger from trusted human co
           "Applies To: skill-lab.*",
           "Decision: skill-lab.publish = allow | draft PR refresh is approved",
         ].join("\n"),
-        html_url: "https://github.com/nilstate/aster/issues/110#issuecomment-3",
+        html_url: "https://github.com/runxhq/aster/issues/110#issuecomment-3",
         created_at: "2026-04-21T08:10:00Z",
         user: { login: "kam", type: "User" },
         author_association: "OWNER",
@@ -110,7 +110,7 @@ test("isTrustedHumanComment rejects bots and untrusted associations", () => {
 
 test("buildIssueLedgerPacket excludes machine status comments from trusted amendments", () => {
   const packet = buildIssueLedgerPacket({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issue: {
       number: 110,
       title: "[skill] Add a collaboration issue distillation skill",
@@ -119,7 +119,7 @@ test("buildIssueLedgerPacket excludes machine status comments from trusted amend
     comments: [
       {
         id: 1,
-        body: "Opened draft PR for this run: https://github.com/nilstate/aster/pull/111",
+        body: "Opened draft PR for this run: https://github.com/runxhq/aster/pull/111",
         created_at: "2026-04-21T07:25:06Z",
         user: { login: "kam", type: "User" },
         author_association: "OWNER",
@@ -147,7 +147,7 @@ test("buildIssueLedgerPacket excludes machine status comments from trusted amend
 
 test("buildIssueLedgerPacket treats a minimal trusted approval comment as structured teaching", () => {
   const packet = buildIssueLedgerPacket({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issue: {
       number: 115,
       title: "[skill] Propose decision-brief for one living work issue ledger",
@@ -182,7 +182,7 @@ test("isMachineStatusComment detects machine-authored issue status surfaces", ()
   );
   assert.equal(
     isMachineStatusComment({
-      body: "Opened draft PR for this run: https://github.com/nilstate/aster/pull/111",
+      body: "Opened draft PR for this run: https://github.com/runxhq/aster/pull/111",
     }),
     true,
   );

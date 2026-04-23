@@ -26,7 +26,7 @@ async function main(argv = process.argv.slice(2)) {
   const outputPath = path.resolve(options.output);
   const bridgeOutput = `${outputPath}.bridge.json`;
   const artifactRoot = path.dirname(outputPath);
-  const repo = process.env.GITHUB_REPOSITORY || "nilstate/aster";
+  const repo = process.env.GITHUB_REPOSITORY || "runxhq/aster";
   const targetRepo = options.targetRepo ?? repo;
   if (!isPrereleaseEligibleTargetRepo(targetRepo)) {
     throw new Error(`target repo '${targetRepo}' is outside prerelease v1 scope.`);

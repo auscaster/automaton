@@ -244,7 +244,7 @@ test("selectOpportunity enforces the portfolio budget before final ranking", () 
   assert.equal(selection.budget_state.projected_counts.context_improvement, 1);
 });
 
-test("discover, score, and select curated prerelease targets inside nilstate scope", async () => {
+test("discover, score, and select curated prerelease targets inside runxhq scope", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "aster-cycle-"));
   const repoRoot = path.join(tempRoot, "repo");
   await mkdir(path.join(repoRoot, "doctrine"), { recursive: true });
@@ -255,14 +255,14 @@ test("discover, score, and select curated prerelease targets inside nilstate sco
   await writeSelectionPolicy(path.join(repoRoot, "state", "selection-policy.json"));
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-aster.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-aster.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/aster",
-      "subject_locator: nilstate/aster",
+      "title: Target Dossier — runxhq/aster",
+      "subject_locator: runxhq/aster",
       "---",
       "",
-      "# nilstate/aster",
+      "# runxhq/aster",
       "",
       "## Default Lanes",
       "",
@@ -276,14 +276,14 @@ test("discover, score, and select curated prerelease targets inside nilstate sco
     ].join("\n"),
   );
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -298,18 +298,18 @@ test("discover, score, and select curated prerelease targets inside nilstate sco
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/aster": {
+        "runxhq/aster": {
           issues: [],
           prs: [],
         },
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [],
           prs: [
             {
               number: 101,
               title: "docs: fix broken app router example",
               body: "Small fix with public impact.",
-              url: "https://github.com/nilstate/runx/pull/101",
+              url: "https://github.com/runxhq/runx/pull/101",
               isDraft: false,
               authorAssociation: "CONTRIBUTOR",
               author: { login: "outside-dev" },
@@ -325,15 +325,15 @@ test("discover, score, and select curated prerelease targets inside nilstate sco
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-16T12:00:00Z",
   });
 
   assert.equal(result.selection.status, "selected");
-  assert.equal(result.selection.selected.target_repo, "nilstate/runx");
+  assert.equal(result.selection.selected.target_repo, "runxhq/runx");
   assert.equal(result.selection.selected.lane, "issue-triage");
-  assert.match(result.selection.priorities[0].subject_locator, /nilstate\/runx#pr\/101/);
+  assert.match(result.selection.priorities[0].subject_locator, /runxhq\/runx#pr\/101/);
   assert.equal(result.selection.priorities[0].within_v1_scope, true);
   assert.equal(result.selection.priorities[0].vetoed, false);
   assert.equal(result.aster_control.targets.length >= 2, true);
@@ -342,13 +342,13 @@ test("discover, score, and select curated prerelease targets inside nilstate sco
   assert.equal(result.aster_control.priorities[0].status, "selected");
   assert.equal(result.aster_control.cycle_records[0].authority.scope, "public_triage");
   assert.equal(result.aster_control.cycle_records[0].dispatch.status, "ready");
-  assert.equal(result.aster_control.cycle_records[0].dispatch.target_repo, "nilstate/runx");
+  assert.equal(result.aster_control.cycle_records[0].dispatch.target_repo, "runxhq/runx");
   assert.equal(
-    result.aster_control.targets.find((entry) => entry.repo === "nilstate/runx")?.lifecycle.selected_count,
+    result.aster_control.targets.find((entry) => entry.repo === "runxhq/runx")?.lifecycle.selected_count,
     1,
   );
   assert.equal(
-    result.aster_control.targets.find((entry) => entry.repo === "nilstate/runx")?.lifecycle.evaluated_count,
+    result.aster_control.targets.find((entry) => entry.repo === "runxhq/runx")?.lifecycle.evaluated_count,
     1,
   );
 });
@@ -371,14 +371,14 @@ test("runAsterCycle persists durable priority and cycle objects", async () => {
   }, null, 2)}\n`);
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -392,13 +392,13 @@ test("runAsterCycle persists durable priority and cycle objects", async () => {
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [
             {
               number: 42,
               title: "docs: repair stale hosted example",
               body: "Bounded public issue.",
-              url: "https://github.com/nilstate/runx/issues/42",
+              url: "https://github.com/runxhq/runx/issues/42",
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
               updatedAt: "2026-04-17T00:00:00Z",
@@ -414,7 +414,7 @@ test("runAsterCycle persists durable priority and cycle objects", async () => {
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-18T12:00:00Z",
   });
@@ -429,11 +429,11 @@ test("runAsterCycle persists durable priority and cycle objects", async () => {
   assert.equal(persisted.cycle_records[0].authority.approval_mode, "workflow_gate");
   assert.equal(persisted.cycle_records[0].dispatch.status, "ready");
   assert.equal(
-    persisted.targets.find((entry) => entry.repo === "nilstate/runx")?.lifecycle.last_selected_at,
+    persisted.targets.find((entry) => entry.repo === "runxhq/runx")?.lifecycle.last_selected_at,
     "2026-04-18T12:00:00.000Z",
   );
   assert.equal(
-    persisted.targets.find((entry) => entry.repo === "nilstate/runx")?.lifecycle.dispatched_count,
+    persisted.targets.find((entry) => entry.repo === "runxhq/runx")?.lifecycle.dispatched_count,
     0,
   );
 });
@@ -456,14 +456,14 @@ test("buildSelectorTrainingRow projects a schema-valid labeled selector row", as
   }, null, 2)}\n`);
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -477,13 +477,13 @@ test("buildSelectorTrainingRow projects a schema-valid labeled selector row", as
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [
             {
               number: 42,
               title: "docs: repair stale hosted example",
               body: "Bounded public issue.",
-              url: "https://github.com/nilstate/runx/issues/42",
+              url: "https://github.com/runxhq/runx/issues/42",
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
               updatedAt: "2026-04-17T00:00:00Z",
@@ -499,7 +499,7 @@ test("buildSelectorTrainingRow projects a schema-valid labeled selector row", as
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-18T12:00:00Z",
   });
@@ -511,7 +511,7 @@ test("buildSelectorTrainingRow projects a schema-valid labeled selector row", as
   assert.equal(trainingRow.selected_bucket, "thesis_work");
   assert.equal(trainingRow.selected_opportunity_id, result.selection.selected?.id ?? null);
   assert.equal(trainingRow.priority_queue.length >= 1, true);
-  assert.equal(trainingRow.candidates[0].target_repo, "nilstate/runx");
+  assert.equal(trainingRow.candidates[0].target_repo, "runxhq/runx");
   assert.equal(trainingRow.candidates[0].vetoed, false);
   assert.equal(trainingRow.candidates[0].authority.scope, "public_triage");
   assert.equal(trainingRow.authority.approval_mode, "workflow_gate");
@@ -573,7 +573,7 @@ test("runAsterCycle vetoes curated external targets outside prerelease v1 scope"
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-16T12:00:00Z",
   });
@@ -614,8 +614,8 @@ test("scoreOpportunities enforces cooldowns from target dossiers", async () => {
       source: "maintenance",
       title: "Run proving-ground",
       summary: "Run proving-ground",
-      subject_locator: "nilstate/aster",
-      target_repo: "nilstate/aster",
+      subject_locator: "runxhq/aster",
+      target_repo: "runxhq/aster",
       stale_days: 0.2,
       dossier: {
         default_lanes: ["proving-ground"],
@@ -635,7 +635,7 @@ test("scoreOpportunities enforces cooldowns from target dossiers", async () => {
   const scored = scoreOpportunities({
     opportunities,
     dossiers: {
-      "nilstate-aster": opportunities[0].dossier,
+      "runxhq-aster": opportunities[0].dossier,
     },
     memory: { history: [], reflections: [] },
     policy,
@@ -675,8 +675,8 @@ test("scoreOpportunities uses evidence projection state for runtime memory count
     source: "github_issue",
     title: "docs: clarify command",
     summary: "docs: clarify command",
-    subject_locator: "nilstate/aster#issue/10",
-    target_repo: "nilstate/aster",
+    subject_locator: "runxhq/aster#issue/10",
+    target_repo: "runxhq/aster",
     is_external: true,
     body_length: 120,
     stale_days: 5,
@@ -694,16 +694,16 @@ test("scoreOpportunities uses evidence projection state for runtime memory count
         {
           lane: "issue-triage",
           date: "2026-04-16T11:00:00Z",
-          target_repo: "nilstate/aster",
-          subject_locator: "nilstate/aster#issue/10",
+          target_repo: "runxhq/aster",
+          subject_locator: "runxhq/aster#issue/10",
           summary: "previous bounded triage",
           receipt_id: "rcpt_prev",
         },
         {
           lane: "issue-triage",
           date: "2026-04-16T10:00:00Z",
-          target_repo: "nilstate/aster",
-          subject_locator: "nilstate/aster#issue/9",
+          target_repo: "runxhq/aster",
+          subject_locator: "runxhq/aster#issue/9",
           summary: "older triage",
           receipt_id: "rcpt_older",
         },
@@ -758,8 +758,8 @@ test("scoreOpportunities uses dossier current opportunities to boost lane fit", 
     source: "github_issue",
     title: "docs: clarify command",
     summary: "docs: clarify command",
-    subject_locator: "nilstate/aster#issue/10",
-    target_repo: "nilstate/aster",
+    subject_locator: "runxhq/aster#issue/10",
+    target_repo: "runxhq/aster",
     is_external: true,
     body_length: 80,
     stale_days: 5,
@@ -813,7 +813,7 @@ test("scoreOpportunities uses dossier current opportunities to boost lane fit", 
 
 test("buildDispatchPlan dispatches curated prerelease opportunities", () => {
   const plan = buildDispatchPlan({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     dispatchRef: "main",
     selection: {
       status: "selected",
@@ -821,8 +821,8 @@ test("buildDispatchPlan dispatches curated prerelease opportunities", () => {
       priorities: [],
       selected: {
         lane: "issue-triage",
-        target_repo: "nilstate/runx",
-        subject_locator: "nilstate/runx#pr/101",
+        target_repo: "runxhq/runx",
+        subject_locator: "runxhq/runx#pr/101",
         pr_number: "101",
         score: 0.81,
         within_v1_scope: true,
@@ -833,7 +833,7 @@ test("buildDispatchPlan dispatches curated prerelease opportunities", () => {
   assert.equal(plan.status, "ready");
   assert.equal(plan.lane, "issue-triage");
   assert.equal(plan.workflow, "issue-triage.yml");
-  assert.equal(plan.inputs.target_repo, "nilstate/runx");
+  assert.equal(plan.inputs.target_repo, "runxhq/runx");
   assert.equal(plan.inputs.pr_number, "101");
 });
 
@@ -848,14 +848,14 @@ test("runAsterCycle prefers a bounded issue over an otherwise eligible PR", asyn
   await writeSelectionPolicy(path.join(repoRoot, "state", "selection-policy.json"));
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -870,13 +870,13 @@ test("runAsterCycle prefers a bounded issue over an otherwise eligible PR", asyn
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [
             {
               number: 202,
               title: "docs: clarify resolver failure messaging",
               body: "Narrow issue with a bounded next step.",
-              url: "https://github.com/nilstate/runx/issues/202",
+              url: "https://github.com/runxhq/runx/issues/202",
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
               updatedAt: "2026-04-15T10:00:00Z",
@@ -887,7 +887,7 @@ test("runAsterCycle prefers a bounded issue over an otherwise eligible PR", asyn
               number: 101,
               title: "docs: tighten resolver validation",
               body: "Small external PR.",
-              url: "https://github.com/nilstate/runx/pull/101",
+              url: "https://github.com/runxhq/runx/pull/101",
               isDraft: false,
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
@@ -904,17 +904,17 @@ test("runAsterCycle prefers a bounded issue over an otherwise eligible PR", asyn
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-16T12:00:00Z",
   });
-  const vetoedPr = result.opportunities.find((entry) => entry.subject_locator === "nilstate/runx#pr/101");
+  const vetoedPr = result.opportunities.find((entry) => entry.subject_locator === "runxhq/runx#pr/101");
 
   assert.equal(result.selection.status, "selected");
-  assert.equal(result.selection.selected.target_repo, "nilstate/runx");
+  assert.equal(result.selection.selected.target_repo, "runxhq/runx");
   assert.equal(result.selection.selected.lane, "issue-triage");
   assert.equal(result.selection.selected.issue_number, "202");
-  assert.equal(vetoedPr?.subject_locator, "nilstate/runx#pr/101");
+  assert.equal(vetoedPr?.subject_locator, "runxhq/runx#pr/101");
   assert.deepEqual(vetoedPr?.veto_reasons ?? [], ["comment_without_welcome_signal"]);
   assert.equal(vetoedPr?.within_v1_scope, true);
 });
@@ -930,14 +930,14 @@ test("runAsterCycle vetoes bot-authored dependency update pull requests", async 
   await writeSelectionPolicy(path.join(repoRoot, "state", "selection-policy.json"));
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -951,13 +951,13 @@ test("runAsterCycle vetoes bot-authored dependency update pull requests", async 
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [
             {
               number: 202,
               title: "docs: clarify resolver failure messaging",
               body: "Narrow issue with a bounded next step.",
-              url: "https://github.com/nilstate/runx/issues/202",
+              url: "https://github.com/runxhq/runx/issues/202",
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
               updatedAt: "2026-04-15T10:00:00Z",
@@ -968,7 +968,7 @@ test("runAsterCycle vetoes bot-authored dependency update pull requests", async 
               number: 18991,
               title: "Update Rust crate similar to v3",
               body: "Renovate artifact drift.",
-              url: "https://github.com/nilstate/runx/pull/18991",
+              url: "https://github.com/runxhq/runx/pull/18991",
               isDraft: false,
               authorAssociation: "NONE",
               author: { login: "app/renovate" },
@@ -986,15 +986,15 @@ test("runAsterCycle vetoes bot-authored dependency update pull requests", async 
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-16T12:00:00Z",
   });
-  const vetoedPr = result.opportunities.find((entry) => entry.subject_locator === "nilstate/runx#pr/18991");
+  const vetoedPr = result.opportunities.find((entry) => entry.subject_locator === "runxhq/runx#pr/18991");
 
   assert.equal(result.selection.status, "selected");
-  assert.equal(result.selection.selected.subject_locator, "nilstate/runx#issue/202");
-  assert.equal(vetoedPr?.subject_locator, "nilstate/runx#pr/18991");
+  assert.equal(result.selection.selected.subject_locator, "runxhq/runx#issue/202");
+  assert.equal(vetoedPr?.subject_locator, "runxhq/runx#pr/18991");
   assert.match(vetoedPr?.veto_reasons.join(",") ?? "", /bot_authored_pull_request/);
   assert.match(vetoedPr?.veto_reasons.join(",") ?? "", /dependency_update_pull_request/);
   assert.match(vetoedPr?.veto_reasons.join(",") ?? "", /internal_or_build_only_pull_request/);
@@ -1011,14 +1011,14 @@ test("runAsterCycle vetoes PR comment candidates without a welcome signal", asyn
   await writeSelectionPolicy(path.join(repoRoot, "state", "selection-policy.json"));
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -1032,13 +1032,13 @@ test("runAsterCycle vetoes PR comment candidates without a welcome signal", asyn
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [
             {
               number: 12,
               title: "docs: clarify parser behavior",
               body: "Bounded issue.",
-              url: "https://github.com/nilstate/runx/issues/12",
+              url: "https://github.com/runxhq/runx/issues/12",
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
               updatedAt: "2026-04-15T10:00:00Z",
@@ -1049,7 +1049,7 @@ test("runAsterCycle vetoes PR comment candidates without a welcome signal", asyn
               number: 101,
               title: "docs: small parser clarification",
               body: "First-time contributor PR without existing discussion.",
-              url: "https://github.com/nilstate/runx/pull/101",
+              url: "https://github.com/runxhq/runx/pull/101",
               isDraft: false,
               authorAssociation: "NONE",
               author: { login: "first-timer" },
@@ -1069,14 +1069,14 @@ test("runAsterCycle vetoes PR comment candidates without a welcome signal", asyn
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-16T12:00:00Z",
   });
-  const vetoedPr = result.opportunities.find((entry) => entry.subject_locator === "nilstate/runx#pr/101");
+  const vetoedPr = result.opportunities.find((entry) => entry.subject_locator === "runxhq/runx#pr/101");
 
   assert.equal(result.selection.status, "selected");
-  assert.equal(result.selection.selected.subject_locator, "nilstate/runx#issue/12");
+  assert.equal(result.selection.selected.subject_locator, "runxhq/runx#issue/12");
   assert.match(vetoedPr?.veto_reasons.join(",") ?? "", /comment_without_welcome_signal/);
 });
 
@@ -1091,14 +1091,14 @@ test("runAsterCycle enforces severe cooldown after a spam outcome", async () => 
   await writeSelectionPolicy(path.join(repoRoot, "state", "selection-policy.json"));
 
   await writeFile(
-    path.join(repoRoot, "state", "targets", "nilstate-runx.md"),
+    path.join(repoRoot, "state", "targets", "runxhq-runx.md"),
     [
       "---",
-      "title: Target Dossier — nilstate/runx",
-      "subject_locator: nilstate/runx",
+      "title: Target Dossier — runxhq/runx",
+      "subject_locator: runxhq/runx",
       "---",
       "",
-      "# nilstate/runx",
+      "# runxhq/runx",
       "",
       "## Default Lanes",
       "",
@@ -1116,13 +1116,13 @@ test("runAsterCycle enforces severe cooldown after a spam outcome", async () => 
     discoveryPath,
     `${JSON.stringify(
       {
-        "nilstate/runx": {
+        "runxhq/runx": {
           issues: [
             {
               number: 202,
               title: "docs: clarify resolver failure messaging",
               body: "Narrow issue with a bounded next step.",
-              url: "https://github.com/nilstate/runx/issues/202",
+              url: "https://github.com/runxhq/runx/issues/202",
               authorAssociation: "NONE",
               author: { login: "outside-dev" },
               updatedAt: "2026-04-16T10:00:00Z",
@@ -1138,11 +1138,11 @@ test("runAsterCycle enforces severe cooldown after a spam outcome", async () => 
 
   const result = await runAsterCycle({
     repoRoot,
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     discoveryInput: discoveryPath,
     now: "2026-04-17T12:00:00Z",
   });
-  const blockedIssue = result.opportunities.find((entry) => entry.subject_locator === "nilstate/runx#issue/202");
+  const blockedIssue = result.opportunities.find((entry) => entry.subject_locator === "runxhq/runx#issue/202");
 
   assert.ok(result.selection.status === "no_op" || result.selection.selected?.lane !== "issue-triage");
   assert.match(blockedIssue?.veto_reasons.join(",") ?? "", /cooldown:severe_/);

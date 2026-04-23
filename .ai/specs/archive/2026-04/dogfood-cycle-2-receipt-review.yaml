@@ -59,7 +59,7 @@ task:
       - "Runx execution-kernel changes."
       - "External PRs."
   dependencies:
-    - "Cycle 1 complete and committed to nilstate/runx main."
+    - "Cycle 1 complete and committed to runxhq/runx main."
     - "runx CLI globally linked."
   assumptions:
     - "receipt-review's harness accepts an additional case alongside the existing one."

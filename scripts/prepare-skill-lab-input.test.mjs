@@ -5,11 +5,11 @@ import { prepareSkillLabInput } from "./prepare-skill-lab-input.mjs";
 
 test("prepareSkillLabInput normalizes GitHub issue form sections", () => {
   const prepared = prepareSkillLabInput({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     ledger_revision: "deadbeefcafebabe",
     number: 42,
     title: "[skill] Add an issue-ledger recap skill",
-    url: "https://github.com/nilstate/aster/issues/42",
+    url: "https://github.com/runxhq/aster/issues/42",
     body: [
       "### Objective",
       "",
@@ -35,7 +35,7 @@ test("prepareSkillLabInput normalizes GitHub issue form sections", () => {
     prepared.objective,
     "Add an issue-ledger recap skill that turns issue discussion into a bounded approval summary.",
   );
-  assert.equal(prepared.source_issue.repo, "nilstate/aster");
+  assert.equal(prepared.source_issue.repo, "runxhq/aster");
   assert.equal(prepared.source_issue.ledger_revision, "deadbeefcafebabe");
   assert.match(prepared.project_context, /Why It Matters/);
   assert.match(prepared.project_context, /Proposal Quality Bar/);
@@ -90,19 +90,19 @@ test("prepareSkillLabInput includes issue-ledger amendments in project context",
         "Why It Matters:",
         "Teach aster through the work issue itself.",
       ].join("\n"),
-      url: "https://github.com/nilstate/aster/issues/110",
+      url: "https://github.com/runxhq/aster/issues/110",
     },
     amendments: [
       {
         author: "kam",
         created_at: "2026-04-21T08:00:00Z",
-        url: "https://github.com/nilstate/aster/issues/110#issuecomment-1",
+        url: "https://github.com/runxhq/aster/issues/110#issuecomment-1",
         body: "Keep the first pass proposal-only and preserve the work-issue ledger model.",
       },
       {
         author: "kam",
         created_at: "2026-04-21T08:05:00Z",
-        url: "https://github.com/nilstate/aster/issues/110#issuecomment-2",
+        url: "https://github.com/runxhq/aster/issues/110#issuecomment-2",
         thread_teaching_record: {
           kind: "approval",
           summary: "One draft refresh is approved.",
@@ -127,7 +127,7 @@ test("prepareSkillLabInput filters machine status comments and preserves teachin
       {
         author: "kam",
         created_at: "2026-04-21T07:25:06Z",
-        body: "Opened draft PR for this run: https://github.com/nilstate/aster/pull/111",
+        body: "Opened draft PR for this run: https://github.com/runxhq/aster/pull/111",
         is_machine_status_comment: true,
       },
       {

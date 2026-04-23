@@ -9,7 +9,7 @@ import {
 test("buildSkillProposalMarkdown renders a reader-facing proposal without transcript residue", () => {
   const markdown = buildSkillProposalMarkdown({
     title: "Add an issue-ledger recap skill",
-    issueUrl: "https://github.com/nilstate/aster/issues/42",
+    issueUrl: "https://github.com/runxhq/aster/issues/42",
     jsonPath: "/tmp/issue-ledger-recap.json",
     payload: {
       skill_spec: {
@@ -73,7 +73,7 @@ test("buildSkillProposalMarkdown renders a reader-facing proposal without transc
       sources: [
         {
           title: "Issue #42",
-          locator: "https://github.com/nilstate/aster/issues/42",
+          locator: "https://github.com/runxhq/aster/issues/42",
           notes: "Primary request",
         },
       ],
@@ -97,7 +97,7 @@ test("buildSkillProposalMarkdown renders a reader-facing proposal without transc
     },
     issuePacket: {
       source_issue: {
-        repo: "nilstate/aster",
+        repo: "runxhq/aster",
         number: 42,
         ledger_revision: "deadbeefcafebabe",
       },
@@ -113,12 +113,12 @@ test("buildSkillProposalMarkdown renders a reader-facing proposal without transc
           author: "kam",
           recorded_at: "2026-04-21T12:24:06Z",
           body: "Hard-cut the contract to subject_locator, subject_memory, and publication_target.",
-          url: "https://github.com/nilstate/aster/issues/42#issuecomment-1",
+          url: "https://github.com/runxhq/aster/issues/42#issuecomment-1",
         },
         {
           author: "kam",
           recorded_at: "2026-04-21T12:30:59Z",
-          url: "https://github.com/nilstate/aster/issues/42#issuecomment-2",
+          url: "https://github.com/runxhq/aster/issues/42#issuecomment-2",
           thread_teaching_record: {
             kind: "publish_authorization",
             summary: "Refresh the single rolling draft PR from the same work ledger.",
@@ -167,7 +167,7 @@ test("buildSkillProposalMarkdown renders a reader-facing proposal without transc
   assert.match(markdown, /## Acceptance Checks/);
   assert.match(markdown, /`ac-fixture-passes`: fixture passes/);
   assert.match(markdown, /## Provenance/);
-  assert.match(markdown, /Work issue: `nilstate\/aster#42`/);
+  assert.match(markdown, /Work issue: `runxhq\/aster#42`/);
   assert.match(markdown, /Ledger revision: `deadbeefcafebabe`/);
   assert.match(markdown, /Trusted maintainer amendments considered: 2/);
   assert.match(markdown, /Evidence note: - state\/thread-teaching\.json/);
@@ -197,7 +197,7 @@ test("extractSkillProposalPayload reads nested execution stdout payloads", () =>
 test("buildSkillProposalMarkdown uses purpose when summary is absent", () => {
   const markdown = buildSkillProposalMarkdown({
     title: "Add decision brief",
-    issueUrl: "https://github.com/nilstate/aster/issues/115",
+    issueUrl: "https://github.com/runxhq/aster/issues/115",
     jsonPath: "/tmp/decision-brief.json",
     payload: {
       skill_spec: {
@@ -229,7 +229,7 @@ test("buildSkillProposalMarkdown uses purpose when summary is absent", () => {
     },
     issuePacket: {
       source_issue: {
-        repo: "nilstate/aster",
+        repo: "runxhq/aster",
         number: 115,
       },
       sections: {
@@ -252,7 +252,7 @@ test("buildSkillProposalMarkdown uses purpose when summary is absent", () => {
 test("buildSkillProposalMarkdown prefers maintainer pain over raw issue why text", () => {
   const markdown = buildSkillProposalMarkdown({
     title: "Add decision brief",
-    issueUrl: "https://github.com/nilstate/aster/issues/115",
+    issueUrl: "https://github.com/runxhq/aster/issues/115",
     jsonPath: "/tmp/decision-brief.json",
     payload: {
       skill_spec: {
@@ -264,7 +264,7 @@ test("buildSkillProposalMarkdown prefers maintainer pain over raw issue why text
     },
     issuePacket: {
       source_issue: {
-        repo: "nilstate/aster",
+        repo: "runxhq/aster",
         number: 115,
       },
       sections: {
@@ -281,7 +281,7 @@ test("buildSkillProposalMarkdown prefers maintainer pain over raw issue why text
 test("buildSkillProposalMarkdown cleans machine-framed reader prose", () => {
   const markdown = buildSkillProposalMarkdown({
     title: "Add decision brief",
-    issueUrl: "https://github.com/nilstate/aster/issues/115",
+    issueUrl: "https://github.com/runxhq/aster/issues/115",
     jsonPath: "/tmp/decision-brief.json",
     payload: {
       skill_spec: {
@@ -305,7 +305,7 @@ test("buildSkillProposalMarkdown cleans machine-framed reader prose", () => {
     },
     issuePacket: {
       source_issue: {
-        repo: "nilstate/aster",
+        repo: "runxhq/aster",
         number: 115,
       },
       amendments: [],

@@ -14,7 +14,7 @@ an LLM or training pipeline should learn against.
 
 ## Scope
 
-- target universe: `nilstate/*` only
+- target universe: `runxhq/*` only
 - mutation posture: draft-first, human-reviewed
 - destructive actions: never inferred from model output
 - external public portfolio: out of scope for prerelease `v1`
@@ -270,7 +270,7 @@ For supervised or synthetic training:
 - a good label is one that reproduces the selected `Priority` and the written
   `CycleRecord`
 - a bad label is one that would:
-  - widen scope beyond `nilstate/*`
+  - widen scope beyond `runxhq/*`
   - ignore a veto
   - bypass the budget filter
   - violate tie-break order

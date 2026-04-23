@@ -29,7 +29,7 @@ test("ensureGeneratedPrPolicyBlock appends a policy block", () => {
 test("inferGeneratedPrLane derives the lane from branch naming", () => {
   assert.equal(
     inferGeneratedPrLane({
-      headRefName: "runx/issue-9-nilstate-aster-01",
+      headRefName: "runx/issue-9-runxhq-aster-01",
       title: "[runx] resolve issue #9 (01)",
       body: "",
     }),

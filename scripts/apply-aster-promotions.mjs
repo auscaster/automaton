@@ -39,7 +39,7 @@ export async function applyAsterPromotions(options) {
   );
   const targetRepo = firstString(packet?.subject?.target_repo)
     || firstString(packet?.subject?.repo)
-    || "nilstate/aster";
+    || "runxhq/aster";
   const targetSlug = slugifyRepoLike(targetRepo);
   const targetDossierPath = path.join(repoRoot, "state", "targets", `${targetSlug}.md`);
   let targetUpdated = false;

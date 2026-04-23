@@ -157,7 +157,7 @@ test("evaluateSkillProposalQuality rejects transcript-shaped public proposals", 
     issuePacket: {
       source_issue: {
         number: 115,
-        url: "https://github.com/nilstate/aster/issues/115",
+        url: "https://github.com/runxhq/aster/issues/115",
       },
     },
     catalogEntries: ["issue-triage"],

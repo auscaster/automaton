@@ -13,7 +13,7 @@ async function main() {
   const existingPr = findExistingPr(options.repo, options.branch);
   const remoteLease = ensureRemoteLease(options.branch);
   const baseStartPoint = options.resetFromBase ? fetchRemoteBranch(base) : null;
-  const ownerRepo = options.ownerRepo ?? process.env.GITHUB_REPOSITORY ?? "nilstate/aster";
+  const ownerRepo = options.ownerRepo ?? process.env.GITHUB_REPOSITORY ?? "runxhq/aster";
   const semanticNoop = readSemanticNoopDecision(options.semanticNoopFile);
 
   if (semanticNoop?.status === "noop") {

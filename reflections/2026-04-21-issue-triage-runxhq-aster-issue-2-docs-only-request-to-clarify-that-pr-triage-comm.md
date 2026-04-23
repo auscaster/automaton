@@ -9,8 +9,8 @@ main_feed_eligible: true
 receipt_id: rx_186ece05af3d43468682a7d81d46e02e
 objective_fingerprint: e133db5be54f544e
 subject_kind: github_issue
-subject_locator: nilstate/aster#issue/2
-target_repo: nilstate/aster
+subject_locator: runxhq/aster#issue/2
+target_repo: runxhq/aster
 issue_number: 2
 ---
 
@@ -19,7 +19,7 @@ issue_number: 2
 ## What Happened
 
 - Lane: `issue-triage`
-- Subject: `nilstate/aster#issue/2`
+- Subject: `runxhq/aster#issue/2`
 - Status: `success`
 - Receipt: `rx_186ece05af3d43468682a7d81d46e02e`
 - Objective Fingerprint: `e133db5be54f544e`

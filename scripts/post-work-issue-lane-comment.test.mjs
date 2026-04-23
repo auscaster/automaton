@@ -7,13 +7,13 @@ test("buildWorkIssueLaneComment renders a rolling work-lane status comment", () 
   const comment = buildWorkIssueLaneComment({
     lane: "docs-pr",
     requestTitle: "Clarify the docs-pr flow.",
-    targetRepo: "nilstate/aster",
-    runUrl: "https://github.com/nilstate/aster/actions/runs/321",
+    targetRepo: "runxhq/aster",
+    runUrl: "https://github.com/runxhq/aster/actions/runs/321",
     ledgerRevision: "deadbeefcafebabe",
     publish: {
       status: "published",
       pr_number: 120,
-      pr_url: "https://github.com/nilstate/aster/pull/120",
+      pr_url: "https://github.com/runxhq/aster/pull/120",
     },
     workflowStatus: "success",
   });

@@ -225,7 +225,7 @@ node scripts/runx-agent-bridge.mjs \
   --body "Describe the concrete repo problem here." \
   --source github_issue \
   --source_id 1 \
-  --source_url https://github.com/nilstate/aster/issues/1
+  --source_url https://github.com/runxhq/aster/issues/1
 ```
 
 If you have prerecorded caller answers for a given proving-ground run, place

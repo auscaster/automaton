@@ -31,7 +31,7 @@ async function main(argv = process.argv.slice(2)) {
 
 export async function deriveEvidenceProjections(options = {}, helpers = {}) {
   const repoRoot = path.resolve(options.repoRoot ?? defaultRepoRoot);
-  const repo = String(options.repo ?? process.env.GITHUB_REPOSITORY ?? "nilstate/aster");
+  const repo = String(options.repo ?? process.env.GITHUB_REPOSITORY ?? "runxhq/aster");
   const statePath = path.resolve(options.output ?? path.join(repoRoot, "state", "evidence-projections.json"));
   const stateInputPath = path.resolve(options.stateInput ?? statePath);
   const downloadRoot = path.resolve(
@@ -227,7 +227,7 @@ async function buildProjectionCandidate({ artifact, repoRoot, summaryPath }) {
   ).replaceAll(path.sep, "/");
   const targetRepo = firstString(packet?.subject?.target_repo)
     || firstString(packet?.subject?.repo)
-    || "nilstate/aster";
+    || "runxhq/aster";
   const targetDossierPath = path.join("state", "targets", `${slugifyRepoLike(targetRepo)}.md`).replaceAll(path.sep, "/");
   const subjectLocator = firstString(packet?.subject?.locator) || null;
   const objectiveFingerprint = firstString(packet?.objective_fingerprint) || null;

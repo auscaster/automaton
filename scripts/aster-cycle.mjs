@@ -33,7 +33,7 @@ async function main(argv = process.argv.slice(2)) {
 
 export async function runAsterCycle(options = {}) {
   const repoRoot = path.resolve(options.repoRoot ?? defaultRepoRoot);
-  const repo = options.repo ?? "nilstate/aster";
+  const repo = options.repo ?? "runxhq/aster";
   const now = options.now ? new Date(options.now) : new Date();
   const controlStatePath = path.join(repoRoot, defaultControlStateRelativePath);
   const policy = await loadSelectionPolicy(path.join(repoRoot, "state", "selection-policy.json"));
@@ -253,7 +253,7 @@ export function discoverOpportunities({ repo, discovery, dossiers, memory, now }
 }
 
 export function scoreOpportunities({
-  repo = "nilstate/aster",
+  repo = "runxhq/aster",
   opportunities,
   dossiers,
   memory,
@@ -273,7 +273,7 @@ export function scoreOpportunities({
 }
 
 export function scoreOpportunity({
-  repo = "nilstate/aster",
+  repo = "runxhq/aster",
   opportunity,
   dossiers,
   memory,
@@ -491,7 +491,7 @@ export function dispatchLane(plan, runner = run) {
     "run",
     plan.workflow,
     "--repo",
-    plan.repo ?? "nilstate/aster",
+    plan.repo ?? "runxhq/aster",
     "--ref",
     plan.ref,
   ];
@@ -670,7 +670,7 @@ export function buildSelectorTrainingRow(result) {
     cycle_id: firstString(result?.cycle_id)
       ?? firstString(latestCycleRecord?.cycle_id)
       ?? cycleIdForGeneratedAt(firstString(result?.generated_at) ?? new Date().toISOString()),
-    repo: firstString(result?.repo) ?? "nilstate/aster",
+    repo: firstString(result?.repo) ?? "runxhq/aster",
     policy_version: Number(result?.policy?.version ?? 1),
     minimum_select_score: Number(result?.policy?.thresholds?.minimum_select_score ?? 0),
     candidates: normalizeCollection(result?.opportunities).map((entry) => ({
@@ -883,10 +883,10 @@ function computeProofStrength(opportunity) {
 
 function computeCompoundingValue(opportunity, dossier) {
   let score = 0.68;
-  if (opportunity.target_repo === "nilstate/aster") {
+  if (opportunity.target_repo === "runxhq/aster") {
     score += 0.09;
   }
-  if (opportunity.target_repo === "nilstate/runx") {
+  if (opportunity.target_repo === "runxhq/runx") {
     score += 0.11;
   }
   if (dossier?.default_lanes?.includes(opportunity.lane)) {

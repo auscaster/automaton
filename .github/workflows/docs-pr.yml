@@ -79,7 +79,7 @@ jobs:
         if: ${{ steps.preflight.outputs.enabled == 'true' }}
         uses: actions/checkout@v6
         with:
-          repository: ${{ vars.RUNX_REPOSITORY || 'nilstate/runx' }}
+          repository: ${{ vars.RUNX_REPOSITORY || 'runxhq/runx' }}
           ref: ${{ vars.RUNX_REF || 'main' }}
           path: .runx/runx
           token: ${{ secrets.RUNX_REPOSITORY_PAT || github.token }}

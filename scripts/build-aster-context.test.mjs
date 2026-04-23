@@ -14,7 +14,7 @@ import {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 test("slugifyRepoLike normalizes repo locators", () => {
-  assert.equal(slugifyRepoLike("nilstate/aster"), "nilstate-aster");
+  assert.equal(slugifyRepoLike("runxhq/aster"), "runxhq-aster");
 });
 
 test("buildContextBundle loads doctrine, state, and target dossier", async () => {
@@ -22,16 +22,16 @@ test("buildContextBundle loads doctrine, state, and target dossier", async () =>
     repoRoot,
     lane: "issue-triage",
     subjectKind: "github_issue",
-    subjectLocator: "nilstate/aster#issue/42",
-    repo: "nilstate/aster",
-    targetRepo: "nilstate/aster",
+    subjectLocator: "runxhq/aster#issue/42",
+    repo: "runxhq/aster",
+    targetRepo: "runxhq/aster",
   });
 
   assert.equal(bundle.lane, "issue-triage");
   assert.equal(bundle.objective_fingerprint, null);
   assert.equal(bundle.subject.kind, "github_issue");
   assert.ok(bundle.state.control);
-  assert.equal(bundle.state.target?.title, "Target Dossier — nilstate/aster");
+  assert.equal(bundle.state.target?.title, "Target Dossier — runxhq/aster");
   assert.ok(bundle.state.target_summary?.default_lanes.includes("issue-triage"));
   assert.ok(bundle.state.target_summary?.current_opportunities.length >= 1);
   assert.ok(bundle.doctrine.some((doc) => doc.title === "Aster Thesis"));
@@ -44,9 +44,9 @@ test("renderContextPrompt includes doctrine and state sections", async () => {
     repoRoot,
     lane: "issue-triage",
     subjectKind: "github_pull_request",
-    subjectLocator: "nilstate/aster#pr/7",
-    repo: "nilstate/aster",
-    targetRepo: "nilstate/runx",
+    subjectLocator: "runxhq/aster#pr/7",
+    repo: "runxhq/aster",
+    targetRepo: "runxhq/runx",
   });
 
   const prompt = renderContextPrompt(bundle);
@@ -72,7 +72,7 @@ test("buildContextBundle and prompt carry thread teaching context", async () => 
           summary: "Stay inside the bounded issue-to-plan surface.",
           recorded_by: "kam",
           source_type: "issue_comment",
-          source_url: "https://github.com/nilstate/aster/issues/42#issuecomment-2",
+          source_url: "https://github.com/runxhq/aster/issues/42#issuecomment-2",
           objective_fingerprint: "issue:runx-42",
           applies_to: ["issue-triage.plan"],
           invariants: [
@@ -90,7 +90,7 @@ test("buildContextBundle and prompt carry thread teaching context", async () => 
             },
           ],
           supersedes: [],
-          repo: "nilstate/aster",
+          repo: "runxhq/aster",
           thread_kind: "issue",
           thread_number: 42,
           author: "kam",
@@ -106,9 +106,9 @@ test("buildContextBundle and prompt carry thread teaching context", async () => 
       repoRoot,
       lane: "issue-triage",
       subjectKind: "github_issue",
-      subjectLocator: "nilstate/aster#issue/42",
-      repo: "nilstate/aster",
-      targetRepo: "nilstate/aster",
+      subjectLocator: "runxhq/aster#issue/42",
+      repo: "runxhq/aster",
+      targetRepo: "runxhq/aster",
       objectiveFingerprint: "issue:runx-42",
       threadTeachingContextFile: threadTeachingContextPath,
       threadTeachingAppliesTo: [
@@ -150,9 +150,9 @@ test("renderContextPrompt surfaces authority and dispatch state from control rec
     lane: "issue-triage",
     subject: {
       kind: "github_issue",
-      locator: "nilstate/runx#issue/42",
-      repo: "nilstate/aster",
-      target_repo: "nilstate/runx",
+      locator: "runxhq/runx#issue/42",
+      repo: "runxhq/aster",
+      target_repo: "runxhq/runx",
       issue_number: "42",
       pr_number: null,
       issue_url: null,
@@ -162,8 +162,8 @@ test("renderContextPrompt surfaces authority and dispatch state from control rec
       control: {
         targets: [
           {
-            target_id: "nilstate-runx",
-            repo: "nilstate/runx",
+            target_id: "runxhq-runx",
+            repo: "runxhq/runx",
             state: "active",
             lifecycle: {
               last_evaluated_at: "2026-04-17T00:00:00Z",
@@ -210,17 +210,17 @@ test("renderContextPrompt surfaces authority and dispatch state from control rec
               approval_mode: "workflow_gate",
               requires_human_approval: true,
               policy_basis: "issue_triage_public_routing_with_workflow_gates",
-              target_repo: "nilstate/runx",
+              target_repo: "runxhq/runx",
             },
             dispatch: {
               status: "dispatched",
               workflow: "issue-triage.yml",
               ref: "main",
-              target_repo: "nilstate/runx",
-              subject_locator: "nilstate/runx#issue/42",
+              target_repo: "runxhq/runx",
+              subject_locator: "runxhq/runx#issue/42",
               score: 0.82,
               inputs: {
-                target_repo: "nilstate/runx",
+                target_repo: "runxhq/runx",
                 issue_number: "42",
               },
             },
@@ -251,12 +251,12 @@ test("renderContextPrompt strips machine status comment bodies from issue-ledger
     lane: "skill-lab",
     subject: {
       kind: "github_issue",
-      locator: "nilstate/aster#issue/110",
-      repo: "nilstate/aster",
-      target_repo: "nilstate/aster",
+      locator: "runxhq/aster#issue/110",
+      repo: "runxhq/aster",
+      target_repo: "runxhq/aster",
       issue_number: "110",
       pr_number: null,
-      issue_url: "https://github.com/nilstate/aster/issues/110",
+      issue_url: "https://github.com/runxhq/aster/issues/110",
     },
     doctrine: [],
     state: {
@@ -272,7 +272,7 @@ test("renderContextPrompt strips machine status comment bodies from issue-ledger
     snapshot: {
       kind: "runx.aster-issue-ledger.v2",
       generated_at: "2026-04-21T00:00:00Z",
-      repo: "nilstate/aster",
+      repo: "runxhq/aster",
       issue: {
         number: 110,
         title: "[skill] Collaboration subject distillation",
@@ -287,9 +287,9 @@ test("renderContextPrompt strips machine status comment bodies from issue-ledger
       machine_status_comments: [
         {
           id: 2,
-          body: "Opened draft PR for this run: https://github.com/nilstate/aster/pull/111",
+          body: "Opened draft PR for this run: https://github.com/runxhq/aster/pull/111",
           created_at: "2026-04-21T07:25:06Z",
-          url: "https://github.com/nilstate/aster/issues/110#issuecomment-2",
+          url: "https://github.com/runxhq/aster/issues/110#issuecomment-2",
           is_machine_status_comment: true,
         },
       ],
@@ -300,7 +300,7 @@ test("renderContextPrompt strips machine status comment bodies from issue-ledger
         substantive_count: 1,
         machine_status_count: 1,
         latest_machine_status_comment_at: "2026-04-21T07:25:06Z",
-        latest_machine_status_comment_url: "https://github.com/nilstate/aster/issues/110#issuecomment-2",
+        latest_machine_status_comment_url: "https://github.com/runxhq/aster/issues/110#issuecomment-2",
       },
       amendment_summary: {
         trusted_human_comment_count: 0,

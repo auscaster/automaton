@@ -16,11 +16,11 @@ import { loadRunxControlSchemaSync } from "./runx-control-schemas.mjs";
 const catalog = validateVerificationProfileCatalog({
   version: "runx.verification_profile_catalog.v2",
   repo_defaults: {
-    "nilstate/aster": "aster.site-ci",
+    "runxhq/aster": "aster.site-ci",
   },
   profiles: {
     "aster.site-ci": {
-      repo: "nilstate/aster",
+      repo: "runxhq/aster",
       description: "Run the site CI checks.",
       bootstrap_commands: ["npm --prefix site ci"],
       commands: ["npm run site:ci"],
@@ -36,12 +36,12 @@ test("normalizeIssueToPrRequest applies the repo default verification profile", 
       source_id: "101",
     },
     {
-      defaultRepo: "nilstate/aster",
+      defaultRepo: "runxhq/aster",
       catalog,
     },
   );
 
-  assert.equal(request.target_repo, "nilstate/aster");
+  assert.equal(request.target_repo, "runxhq/aster");
   assert.equal(request.verification_profile, "aster.site-ci");
 });
 
@@ -66,7 +66,7 @@ test("normalizeIssueToPrRequest preserves an explicit verification profile when 
     source_id: "101",
     verification_profile: "aster.site-ci",
   }, {
-    defaultRepo: "nilstate/aster",
+    defaultRepo: "runxhq/aster",
   });
 
   assert.equal(request.verification_profile, "aster.site-ci");
@@ -81,7 +81,7 @@ test("normalizeIssueToPrRequest rejects direct publication branches outside runx
       source_id: "101",
       branch: "main",
     }, {
-      defaultRepo: "nilstate/aster",
+      defaultRepo: "runxhq/aster",
       catalog,
     });
   }, /issue_to_pr_request\.branch/);
@@ -97,7 +97,7 @@ test("normalizeAutomationBranchName accepts bounded automation branches", () => 
 test("resolveVerificationPlan maps legacy validation commands onto a declared profile", () => {
   const resolved = resolveVerificationPlan({
     catalog,
-    targetRepo: "nilstate/aster",
+    targetRepo: "runxhq/aster",
     issueToPrRequest: {
       issue_title: "Fix docs drift",
       source: "github_issue",
@@ -134,7 +134,7 @@ test("collectWorkerValidationIssues filters invalid worker requests", () => {
       },
     ],
     {
-      defaultRepo: "nilstate/aster",
+      defaultRepo: "runxhq/aster",
       catalog,
     },
   );
@@ -153,9 +153,9 @@ test("normalizeWorkerRequest rejects schema-invalid extra properties", () => {
         source: "github_issue",
         source_id: "101",
       },
-      target_repo: "nilstate/aster",
+      target_repo: "runxhq/aster",
     }, {
-      defaultRepo: "nilstate/aster",
+      defaultRepo: "runxhq/aster",
       catalog,
     });
   }, /urn:aster:schema:worker-request:v1/);
@@ -168,7 +168,7 @@ test("normalizeWorkspaceChangePlanRequest preserves structured target surfaces",
       project_context: "aster workspace",
       target_surfaces: [
         {
-          surface: "nilstate/aster",
+          surface: "runxhq/aster",
           kind: "repo",
           mutating: true,
           rationale: "Single prerelease repo scope.",
@@ -178,12 +178,12 @@ test("normalizeWorkspaceChangePlanRequest preserves structured target surfaces",
       success_criteria: ["One bounded plan exists before changes start."],
     },
     {
-      targetRepo: "nilstate/aster",
+      targetRepo: "runxhq/aster",
     },
   );
 
   assert.equal(request.target_surfaces.length, 1);
-  assert.equal(request.target_surfaces[0].surface, "nilstate/aster");
+  assert.equal(request.target_surfaces[0].surface, "runxhq/aster");
   assert.equal(request.target_surfaces[0].mutating, true);
 });
 

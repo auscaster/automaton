@@ -8,13 +8,13 @@ import {
 
 test("buildThreadTeachingEntries normalizes thread records into derived rows", () => {
   const report = buildThreadTeachingEntries({
-    repo: "nilstate/runx",
+    repo: "runxhq/runx",
     threads: [
       {
         kind: "issue",
         number: 42,
         title: "Bounded docs publish",
-        url: "https://github.com/nilstate/runx/issues/42",
+        url: "https://github.com/runxhq/runx/issues/42",
         state: "open",
       },
     ],
@@ -28,9 +28,9 @@ test("buildThreadTeachingEntries normalizes thread records into derived rows", (
           "Kind: publish_authorization",
           "Summary: One bounded docs PR may be published.",
           "Applies To: docs-pr.publish",
-          "Target Repo: nilstate/runx",
+          "Target Repo: runxhq/runx",
         ].join("\n"),
-        url: "https://github.com/nilstate/runx/issues/42#issuecomment-1",
+        url: "https://github.com/runxhq/runx/issues/42#issuecomment-1",
         created_at: "2026-04-20T01:00:00Z",
       },
     ],
@@ -38,7 +38,7 @@ test("buildThreadTeachingEntries normalizes thread records into derived rows", (
   });
 
   assert.equal(report.records.length, 1);
-  assert.equal(report.records[0].thread, "nilstate/runx#issue/42");
+  assert.equal(report.records[0].thread, "runxhq/runx#issue/42");
   assert.equal(report.records[0].status, "active");
   assert.equal(report.records[0].thread_teaching_record?.kind, "publish_authorization");
   assert.equal(report.teaching_rows[0]?.record_kind, "publish_authorization");
@@ -46,13 +46,13 @@ test("buildThreadTeachingEntries normalizes thread records into derived rows", (
 
 test("buildThreadTeachingEntries accepts markerless gate comments", () => {
   const report = buildThreadTeachingEntries({
-    repo: "nilstate/runx",
+    repo: "runxhq/runx",
     threads: [
       {
         kind: "issue",
         number: 43,
         title: "Bounded docs publish",
-        url: "https://github.com/nilstate/runx/issues/43",
+        url: "https://github.com/runxhq/runx/issues/43",
         state: "open",
       },
     ],
@@ -65,7 +65,7 @@ test("buildThreadTeachingEntries accepts markerless gate comments", () => {
           "Applies To: docs-pr.publish",
           "Decision: docs-pr.publish = allow | bounded draft publication is approved",
         ].join("\n"),
-        url: "https://github.com/nilstate/runx/issues/43#issuecomment-1",
+        url: "https://github.com/runxhq/runx/issues/43#issuecomment-1",
         created_at: "2026-04-20T01:00:00Z",
       },
     ],
@@ -79,7 +79,7 @@ test("buildThreadTeachingEntries accepts markerless gate comments", () => {
 
 test("deriveThreadTeaching emits rebuildable state and teaching rows", async () => {
   const report = await deriveThreadTeaching({
-    repos: ["nilstate/runx"],
+    repos: ["runxhq/runx"],
     searchLimit: 5,
     now: "2026-04-20T03:00:00Z",
   }, {
@@ -88,7 +88,7 @@ test("deriveThreadTeaching emits rebuildable state and teaching rows", async () 
         kind: "issue",
         number: 42,
         title: "Bounded docs publish",
-        url: "https://github.com/nilstate/runx/issues/42",
+        url: "https://github.com/runxhq/runx/issues/42",
         state: "open",
       },
     ],
@@ -101,9 +101,9 @@ test("deriveThreadTeaching emits rebuildable state and teaching rows", async () 
           "<!-- aster:thread-teaching-record -->",
           "Kind: lesson",
           "Summary: Prefer draft PRs over direct mutation.",
-          "Target Repo: nilstate/runx",
+          "Target Repo: runxhq/runx",
         ].join("\n"),
-        url: "https://github.com/nilstate/runx/issues/42#issuecomment-1",
+        url: "https://github.com/runxhq/runx/issues/42#issuecomment-1",
         created_at: "2026-04-20T01:00:00Z",
       },
     ],

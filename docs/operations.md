@@ -133,8 +133,8 @@ work issue. The richest form is the canonical block:
 Kind: publish_authorization
 Summary: One bounded docs PR may be published for this repo.
 Recorded By: kam
-Target Repo: nilstate/runx
-Subject Locator: nilstate/runx
+Target Repo: runxhq/runx
+Subject Locator: runxhq/runx
 Objective Fingerprint: issue:runx-42
 Applies To: docs-pr.publish
 Invariant: Keep the change docs-only.
@@ -153,7 +153,7 @@ Decision: skill-lab.publish = allow | refresh one draft PR from this same work l
 ```md
 Kind: lesson
 Summary: Keep the work issue as the living ledger.
-Target Repo: nilstate/runx
+Target Repo: runxhq/runx
 ```
 
 Supported `Kind` values:

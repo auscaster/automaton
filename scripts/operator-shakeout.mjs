@@ -40,7 +40,7 @@ export async function buildOperatorShakeoutReport({ repoRoot, publishEvidencePat
       fingerprint: "abc12345deadbeef",
     }),
     subjectKind: "github_issue",
-    subjectLocator: "nilstate/aster#issue/101",
+    subjectLocator: "runxhq/aster#issue/101",
   });
   const generatedBody = ensureGeneratedPrPolicyBlock("## Summary\n\nBounded PR body.", {
     lane: "docs-pr",
@@ -92,7 +92,7 @@ export async function buildOperatorShakeoutReport({ repoRoot, publishEvidencePat
   });
   const rollbackPlan = buildRollbackPlan({
     mode: "pr-comment",
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     pr: "12",
     reason: "Superseded by a narrower correction.",
     replacementBody: "Please review only the deployment note changes.",

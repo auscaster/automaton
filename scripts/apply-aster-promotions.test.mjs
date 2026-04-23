@@ -64,7 +64,7 @@ test("applyAsterPromotions copies drafts and updates target dossier", async () =
         receipt_id: "rcpt_123",
         summary: "README command drift",
         subject: {
-          target_repo: "nilstate/aster",
+          target_repo: "runxhq/aster",
         },
       },
       null,
@@ -91,7 +91,7 @@ test("applyAsterPromotions copies drafts and updates target dossier", async () =
     summary: summaryPath,
   });
 
-  const dossier = await readFile(path.join(repoRoot, "state", "targets", "nilstate-aster.md"), "utf8");
+  const dossier = await readFile(path.join(repoRoot, "state", "targets", "runxhq-aster.md"), "utf8");
   assert.equal(result.status, "applied");
   assert.match(dossier, /updated: 2026-04-16/);
   assert.match(dossier, /## Recent Outcomes/);
@@ -127,7 +127,7 @@ test("applyAsterPromotions leaves public surfaces untouched for state-only proje
         receipt_id: "rcpt_456",
         summary: "lane finished with success",
         subject: {
-          target_repo: "nilstate/aster",
+          target_repo: "runxhq/aster",
         },
       },
       null,
@@ -162,7 +162,7 @@ test("applyAsterPromotions leaves public surfaces untouched for state-only proje
   assert.equal(result.target_updated, false);
   await assert.rejects(readFile(path.join(repoRoot, "reflections", "reflection.md"), "utf8"));
   await assert.rejects(readFile(path.join(repoRoot, "history", "entry.md"), "utf8"));
-  await assert.rejects(readFile(path.join(repoRoot, "state", "targets", "nilstate-aster.md"), "utf8"));
+  await assert.rejects(readFile(path.join(repoRoot, "state", "targets", "runxhq-aster.md"), "utf8"));
 });
 
 test("resolvePromotionOutputs falls back to artifact-local promotion files", async () => {

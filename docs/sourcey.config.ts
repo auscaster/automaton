@@ -1,6 +1,6 @@
 export default {
   name: "aster",
-  repo: "https://github.com/nilstate/aster",
+  repo: "https://github.com/runxhq/aster",
   editBranch: "main",
   editBasePath: "docs",
   theme: {
@@ -40,20 +40,20 @@ export default {
     links: [
       {
         type: "github",
-        href: "https://github.com/nilstate/aster",
+        href: "https://github.com/runxhq/aster",
       },
     ],
     primary: {
       type: "button",
       label: "View Repo",
-      href: "https://github.com/nilstate/aster",
+      href: "https://github.com/runxhq/aster",
     },
   },
   footer: {
     links: [
       {
         type: "github",
-        href: "https://github.com/nilstate/aster",
+        href: "https://github.com/runxhq/aster",
       },
     ],
   },

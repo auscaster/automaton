@@ -15,8 +15,8 @@ test("parseThreadTeachingRecordBody extracts generic thread-teaching fields", ()
     "Kind: publish_authorization",
     "Summary: Human reviewed the request and approved one draft docs PR.",
     "Recorded By: kam",
-    "Target Repo: nilstate/runx",
-    "Subject Locator: nilstate/runx",
+    "Target Repo: runxhq/runx",
+    "Subject Locator: runxhq/runx",
     "Objective Fingerprint: issue:docs-42",
     "Applies To: docs-pr.publish",
     "Label: docs, publish",
@@ -30,8 +30,8 @@ test("parseThreadTeachingRecordBody extracts generic thread-teaching fields", ()
   assert.equal(parsed?.kind, "publish_authorization");
   assert.equal(parsed?.summary, "Human reviewed the request and approved one draft docs PR.");
   assert.equal(parsed?.recorded_by, "kam");
-  assert.equal(parsed?.target_repo, "nilstate/runx");
-  assert.equal(parsed?.subject_locator, "nilstate/runx");
+  assert.equal(parsed?.target_repo, "runxhq/runx");
+  assert.equal(parsed?.subject_locator, "runxhq/runx");
   assert.equal(parsed?.objective_fingerprint, "issue:docs-42");
   assert.deepEqual(parsed?.applies_to, ["docs-pr.publish"]);
   assert.deepEqual(parsed?.labels, ["docs", "publish"]);
@@ -54,8 +54,8 @@ test("parseThreadTeachingRecordBody accepts the work issue form block", () => {
     "Kind: approval",
     "Summary: Planning may proceed for this issue.",
     "Recorded By: kam",
-    "Target Repo: nilstate/runx",
-    "Subject Locator: nilstate/runx#issue/42",
+    "Target Repo: runxhq/runx",
+    "Subject Locator: runxhq/runx#issue/42",
     "Applies To: issue-triage.plan",
     "Decision: issue-triage.plan = allow | planning is approved",
     "",
@@ -66,7 +66,7 @@ test("parseThreadTeachingRecordBody accepts the work issue form block", () => {
 
   assert.equal(parsed?.kind, "approval");
   assert.equal(parsed?.summary, "Planning may proceed for this issue.");
-  assert.equal(parsed?.target_repo, "nilstate/runx");
+  assert.equal(parsed?.target_repo, "runxhq/runx");
   assert.deepEqual(parsed?.applies_to, ["issue-triage.plan"]);
 });
 
@@ -75,13 +75,13 @@ test("parseThreadTeachingRecordBody accepts a plain field block without the mark
     "Kind: lesson",
     "Summary: Keep the work issue as the living ledger.",
     "Recorded By: kam",
-    "Target Repo: nilstate/runx",
+    "Target Repo: runxhq/runx",
   ].join("\n"));
 
   assert.equal(parsed?.kind, "lesson");
   assert.equal(parsed?.summary, "Keep the work issue as the living ledger.");
   assert.equal(parsed?.recorded_by, "kam");
-  assert.equal(parsed?.target_repo, "nilstate/runx");
+  assert.equal(parsed?.target_repo, "runxhq/runx");
 });
 
 test("parseThreadTeachingRecordBody infers a gate approval from Applies To and Decision lines", () => {
@@ -169,7 +169,7 @@ test("deriveThreadTeachingContext allows a markerless trusted publish approval c
       created_at: "2026-04-22T15:36:27Z",
     },
   ], {
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     threadKind: "issue",
     threadNumber: "115",
     appliesTo: ["skill-lab.publish"],

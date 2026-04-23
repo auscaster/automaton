@@ -6,13 +6,13 @@ import { buildSkillLabComment, SKILL_LAB_MARKER } from "./post-skill-lab-comment
 test("buildSkillLabComment renders the rolling issue status comment", () => {
   const comment = buildSkillLabComment({
     objective: "Add an issue-ledger distillation skill",
-    runUrl: "https://github.com/nilstate/aster/actions/runs/123",
+    runUrl: "https://github.com/runxhq/aster/actions/runs/123",
     ledgerRevision: "deadbeefcafebabe",
     workflowStatus: "success",
     publish: {
       status: "published",
       pr_number: 111,
-      pr_url: "https://github.com/nilstate/aster/pull/111",
+      pr_url: "https://github.com/runxhq/aster/pull/111",
     },
     result: {
       execution: {

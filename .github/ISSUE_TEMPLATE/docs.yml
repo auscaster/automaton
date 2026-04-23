@@ -18,7 +18,7 @@ body:
     attributes:
       label: Target Repo
       description: Repo to mutate. Leave blank to target this repo.
-      placeholder: nilstate/aster
+      placeholder: runxhq/aster
   - type: textarea
     id: objective
     attributes:

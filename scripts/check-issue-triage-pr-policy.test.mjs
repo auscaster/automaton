@@ -81,7 +81,7 @@ test("checkIssueTriagePrPolicy blocks generated issue-triage worker PRs", async 
       body: "<!-- aster:generated-pr-policy lane=issue-triage merge=human_review draft_only=true -->\n\n## Summary\n\nGenerated policy body.",
       author: "github-actions[bot]",
       author_association: "MEMBER",
-      head_ref: "runx/issue-71-nilstate-aster-01",
+      head_ref: "runx/issue-71-runxhq-aster-01",
       labels: [],
       comment_count: 0,
       review_count: 0,

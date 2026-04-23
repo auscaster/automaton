@@ -19,7 +19,7 @@ selected public evidence, not from Sourcey docs.
 ## P3. Strengthen Target Dossiers
 
 The operator should know the trust posture, current opportunities, and recent
-outcome history for `nilstate/aster` and `nilstate/runx` before expanding
+outcome history for `runxhq/aster` and `runxhq/runx` before expanding
 further.
 
 ## P4. Keep Proof Honest

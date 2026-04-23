@@ -39,7 +39,7 @@ jobs:
       - name: Check out runx
         uses: actions/checkout@v6
         with:
-          repository: nilstate/runx-platform
+          repository: runxhq/runx-platform
           path: runx
           token: ${{ secrets.ASTER_GH_TOKEN }}
 

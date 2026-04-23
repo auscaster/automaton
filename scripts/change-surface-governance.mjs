@@ -91,7 +91,7 @@ export function summarizeChangeSurfaces(files = []) {
 export function evaluateLaneChangeSurfacePolicy({
   lane,
   repo,
-  ownerRepo = process.env.GITHUB_REPOSITORY || "nilstate/aster",
+  ownerRepo = process.env.GITHUB_REPOSITORY || "runxhq/aster",
   files = [],
 }) {
   const summary = summarizeChangeSurfaces(files);

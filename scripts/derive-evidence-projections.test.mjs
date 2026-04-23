@@ -22,7 +22,7 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
       generated_at: "2026-04-19T00:00:00Z",
       source: {
         type: "github_actions_artifacts",
-        repo: "nilstate/aster",
+        repo: "runxhq/aster",
         artifact_prefixes: ["issue-triage-", "skill-lab-"],
         artifact_limit: 200,
       },
@@ -51,13 +51,13 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
   const report = await deriveEvidenceProjections(
     {
       repoRoot,
-      repo: "nilstate/aster",
+      repo: "runxhq/aster",
       stateInput: stateInputPath,
       output: statePath,
       downloadRoot: path.join(tempRoot, "downloads"),
       now: "2026-04-20T08:30:00Z",
       workflowRunId: "24704064892",
-      workflowRunUrl: "https://github.com/nilstate/aster/actions/runs/24704064892",
+      workflowRunUrl: "https://github.com/runxhq/aster/actions/runs/24704064892",
     },
     {
       listArtifacts: async () => ([
@@ -110,10 +110,10 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
               status: "success",
               receipt_id: "rcpt_100",
               summary: "older proof record",
-              objective_fingerprint: "pr:nilstate-runx-10",
+              objective_fingerprint: "pr:runxhq-runx-10",
               subject: {
-                locator: "nilstate/runx#pr/10",
-                target_repo: "nilstate/runx",
+                locator: "runxhq/runx#pr/10",
+                target_repo: "runxhq/runx",
               },
             }
           : {
@@ -122,18 +122,18 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
               status: "success",
               receipt_id: artifact.id === 101 ? "rcpt_101" : "rcpt_102",
               summary: artifact.id === 101 ? "clarified issue routing (first pass)" : "clarified issue routing (final pass)",
-              objective_fingerprint: "issue:nilstate-runx-11",
+              objective_fingerprint: "issue:runxhq-runx-11",
               subject: {
-                locator: "nilstate/runx#issue/11",
-                target_repo: "nilstate/runx",
+                locator: "runxhq/runx#issue/11",
+                target_repo: "runxhq/runx",
               },
             };
 
         const baseName = artifact.id === 100
-          ? "2026-04-19-issue-triage-nilstate-runx-pr-10-proof"
+          ? "2026-04-19-issue-triage-runxhq-runx-pr-10-proof"
           : artifact.id === 101
-            ? "2026-04-20-issue-triage-nilstate-runx-issue-11-first-pass"
-            : "2026-04-20-issue-triage-nilstate-runx-issue-11-final-pass";
+            ? "2026-04-20-issue-triage-runxhq-runx-issue-11-first-pass"
+            : "2026-04-20-issue-triage-runxhq-runx-issue-11-final-pass";
         const reflectionPath = path.join(promotionsDir, `${baseName}.md`);
         const historyPath = path.join(promotionsDir, `history-${baseName}.md`);
         const packetPath = path.join(promotionsDir, `${baseName}.json`);
@@ -156,13 +156,13 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
     },
   );
 
-  const dossier = await readFile(path.join(repoRoot, "state", "targets", "nilstate-runx.md"), "utf8");
+  const dossier = await readFile(path.join(repoRoot, "state", "targets", "runxhq-runx.md"), "utf8");
   const selectedReflection = await readFile(
-    path.join(repoRoot, "reflections", "2026-04-20-issue-triage-nilstate-runx-issue-11-final-pass.md"),
+    path.join(repoRoot, "reflections", "2026-04-20-issue-triage-runxhq-runx-issue-11-final-pass.md"),
     "utf8",
   );
   const selectedHistory = await readFile(
-    path.join(repoRoot, "history", "2026-04-20-issue-triage-nilstate-runx-issue-11-final-pass.md"),
+    path.join(repoRoot, "history", "2026-04-20-issue-triage-runxhq-runx-issue-11-final-pass.md"),
     "utf8",
   );
 
@@ -182,11 +182,11 @@ test("deriveEvidenceProjections rebuilds projection state from artifacts and sup
   assert.equal(report.state.stats.applied_summaries, 1);
   assert.equal(report.state.stats.suppressed_summaries, 1);
   assert.equal(report.state.stats.skipped_artifacts, 1);
-  assert.equal(report.state.artifacts[1].summaries[0].objective_fingerprint, "issue:nilstate-runx-11");
-  assert.match(report.state.artifacts[1].summaries[0].projection_key, /issue:nilstate-runx-11/);
+  assert.equal(report.state.artifacts[1].summaries[0].objective_fingerprint, "issue:runxhq-runx-11");
+  assert.match(report.state.artifacts[1].summaries[0].projection_key, /issue:runxhq-runx-11/);
   assert.equal(report.state.artifacts[1].summaries[0].promotion_scope, "public");
   assert.equal(report.latest_batch.workflow_run_id, "24704064892");
-  assert.deepEqual(report.latest_batch.touched_targets, ["nilstate/runx"]);
+  assert.deepEqual(report.latest_batch.touched_targets, ["runxhq/runx"]);
   assert.equal(report.latest_batch.skipped_reasons.no_core_summary, 1);
   assert.match(dossier, /rcpt_102/);
   assert.match(dossier, /clarified issue routing \(final pass\)/);
@@ -204,7 +204,7 @@ test("deriveEvidenceProjections keeps generic low-signal summaries in state only
   const report = await deriveEvidenceProjections(
     {
       repoRoot,
-      repo: "nilstate/aster",
+      repo: "runxhq/aster",
       output: statePath,
       downloadRoot: path.join(tempRoot, "downloads"),
       now: "2026-04-21T00:00:00Z",
@@ -240,8 +240,8 @@ test("deriveEvidenceProjections keeps generic low-signal summaries in state only
               receipt_id: "rcpt_201",
               summary: "lane finished with needs_resolution",
               subject: {
-                locator: "nilstate/aster#pr/88",
-                target_repo: "nilstate/aster",
+                locator: "runxhq/aster#pr/88",
+                target_repo: "runxhq/aster",
               },
             },
             null,
@@ -274,7 +274,7 @@ test("deriveEvidenceProjections keeps generic low-signal summaries in state only
     readFile(path.join(repoRoot, "history", "2026-04-21-issue-triage-pr-88.md"), "utf8"),
   );
   await assert.rejects(
-    readFile(path.join(repoRoot, "state", "targets", "nilstate-aster.md"), "utf8"),
+    readFile(path.join(repoRoot, "state", "targets", "runxhq-aster.md"), "utf8"),
   );
 });
 
@@ -282,7 +282,7 @@ test("renderLatestBatchMarkdown formats the current derive batch for the rolling
   const markdown = renderLatestBatchMarkdown({
     generated_at: "2026-04-21T04:29:28.856Z",
     workflow_run_id: "24704064892",
-    workflow_run_url: "https://github.com/nilstate/aster/actions/runs/24704064892",
+    workflow_run_url: "https://github.com/runxhq/aster/actions/runs/24704064892",
     scanned_artifacts: 86,
     new_artifacts: 4,
     rebuilt_artifacts: 86,
@@ -293,7 +293,7 @@ test("renderLatestBatchMarkdown formats the current derive batch for the rolling
     state_only_projection_groups: 3,
     skipped_artifacts: 1,
     error_count: 0,
-    touched_targets: ["nilstate/aster", "nilstate/runx"],
+    touched_targets: ["runxhq/aster", "runxhq/runx"],
     skipped_reasons: {
       no_core_summary: 1,
     },
@@ -303,7 +303,7 @@ test("renderLatestBatchMarkdown formats the current derive batch for the rolling
   assert.match(markdown, /## Latest Batch/);
   assert.match(markdown, /24704064892/);
   assert.match(markdown, /Touched Targets/);
-  assert.match(markdown, /nilstate\/runx/);
+  assert.match(markdown, /runxhq\/runx/);
   assert.match(markdown, /Skip Reasons/);
   assert.match(markdown, /Public projection summaries/);
   assert.match(markdown, /State-only summaries/);

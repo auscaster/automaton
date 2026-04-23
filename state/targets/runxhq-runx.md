@@ -1,12 +1,12 @@
 ---
-title: Target Dossier — nilstate/runx
+title: Target Dossier — runxhq/runx
 updated: 2026-04-17
 visibility: public
 subject_kind: github_repository
-subject_locator: nilstate/runx
+subject_locator: runxhq/runx
 ---
 
-# nilstate/runx
+# runxhq/runx
 
 ## Why It Matters
 

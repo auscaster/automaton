@@ -5,15 +5,15 @@ import { prepareWorkIssueRequest } from "./prepare-work-issue-request.mjs";
 
 test("prepareWorkIssueRequest normalizes one work issue into a governed PR request", () => {
   const prepared = prepareWorkIssueRequest({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issue: {
       number: 14,
       title: "[issue-to-pr] Clarify the docs-pr flow",
-      url: "https://github.com/nilstate/aster/issues/14",
+      url: "https://github.com/runxhq/aster/issues/14",
       body: [
         "### Target Repo",
         "",
-        "nilstate/aster",
+        "runxhq/aster",
         "",
         "### Objective",
         "",
@@ -36,7 +36,7 @@ test("prepareWorkIssueRequest normalizes one work issue into a governed PR reque
       {
         author: "kam",
         created_at: "2026-04-21T10:00:00Z",
-        url: "https://github.com/nilstate/aster/issues/14#issuecomment-1",
+        url: "https://github.com/runxhq/aster/issues/14#issuecomment-1",
         body: "Also mention that replies on the same issue should retrigger the lane.",
       },
     ],
@@ -44,8 +44,8 @@ test("prepareWorkIssueRequest normalizes one work issue into a governed PR reque
   }, { lane: "docs-pr" });
 
   assert.equal(prepared.request_title, "Clarify the docs-pr flow.");
-  assert.equal(prepared.target_repo, "nilstate/aster");
-  assert.equal(prepared.source_issue.repo, "nilstate/aster");
+  assert.equal(prepared.target_repo, "runxhq/aster");
+  assert.equal(prepared.source_issue.repo, "runxhq/aster");
   assert.match(prepared.request_body, /Acceptance Criteria/);
   assert.match(prepared.request_body, /Maintainer Amendments/);
   assert.match(prepared.request_body, /retrigger the lane/);
@@ -54,7 +54,7 @@ test("prepareWorkIssueRequest normalizes one work issue into a governed PR reque
 
 test("prepareWorkIssueRequest exposes upstream-specific optional fields", () => {
   const prepared = prepareWorkIssueRequest({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issue: {
       number: 18,
       title: "[upstream] Add SKILL.md to icey-cli",
@@ -78,7 +78,7 @@ test("prepareWorkIssueRequest exposes upstream-specific optional fields", () => 
 
 test("prepareWorkIssueRequest falls back to workflow defaults when the issue omits target fields", () => {
   const prepared = prepareWorkIssueRequest({
-    repo: "nilstate/aster",
+    repo: "runxhq/aster",
     issue: {
       number: 20,
       title: "[issue-to-pr] Tighten the README wording",
@@ -87,11 +87,11 @@ test("prepareWorkIssueRequest falls back to workflow defaults when the issue omi
     ledger_revision: "abc123def456",
   }, {
     lane: "docs-pr",
-    defaultTargetRepo: "nilstate/aster",
+    defaultTargetRepo: "runxhq/aster",
     defaultTargetRef: "main",
   });
 
-  assert.equal(prepared.target_repo, "nilstate/aster");
+  assert.equal(prepared.target_repo, "runxhq/aster");
   assert.equal(prepared.target_ref, "main");
   assert.match(prepared.request_body, /ledger revision/i);
 });
