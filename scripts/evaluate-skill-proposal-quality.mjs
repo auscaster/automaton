@@ -6,7 +6,7 @@ import { extractSkillProposalPayload } from "./write-skill-proposal.mjs";
 const residuePatterns = [
   {
     id: "supplied_decomposition",
-    pattern: /\bsupplied\b/i,
+    pattern: /\b(?:based on|from|using|according to)\s+(?:the\s+)?supplied\s+(?:decomposition|work-plan|work plan|catalog|builder|evidence|context|issue|packet|proposal|ledger|thread)\b|\bsupplied\s+(?:decomposition|work-plan|work plan|catalog|builder|evidence|context|issue|packet|proposal|ledger|thread)\b/i,
     message: "Replace builder-source framing that says evidence was 'supplied' with maintainer-facing proposal language.",
   },
   {

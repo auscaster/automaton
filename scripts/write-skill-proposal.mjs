@@ -568,6 +568,7 @@ function cleanReaderFacingText(value) {
     return null;
   }
   return String(value)
+    .replace(/\bsupplied\b/gi, "provided")
     .replace(/\bprior\s+(?:machine|agent|model|llm|ai)\s+output\b/gi, "prior run artifacts")
     .replace(/\b(?:machine|agent|model|llm|ai)\s+output\b/gi, "run output")
     .replace(/\bthe\s+(?:machine|agent|model|llm|ai)\s+should\b/gi, "the skill should")

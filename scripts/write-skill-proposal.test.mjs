@@ -298,6 +298,7 @@ test("buildSkillProposalMarkdown cleans machine-framed reader prose", () => {
       },
       acceptance_checks: [
         "The machine should produce a reviewable packet.",
+        "The adapter may run when no policy is supplied.",
         "It keeps provenance.",
         "It stops at review.",
       ],
@@ -314,7 +315,9 @@ test("buildSkillProposalMarkdown cleans machine-framed reader prose", () => {
   assert.match(markdown, /the skill should return a compact decision brief from prior run artifacts/i);
   assert.match(markdown, /Maintainers lose time reconstructing state from prior run artifacts\./);
   assert.match(markdown, /the skill should expose one answer instead of asking maintainers to replay run output/i);
+  assert.match(markdown, /when no policy is provided/i);
   assert.doesNotMatch(markdown, /\bmachine output\b/i);
   assert.doesNotMatch(markdown, /\bagent output\b/i);
   assert.doesNotMatch(markdown, /\bthe machine should\b/i);
+  assert.doesNotMatch(markdown, /\bsupplied\b/i);
 });

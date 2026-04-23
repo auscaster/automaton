@@ -293,6 +293,7 @@ test("evaluateSkillProposalQuality rejects supplied catalog and work-plan framin
             summary: "Read one bounded thread and return one concise maintainer decision packet.",
             inputs: [{ name: "thread_body", type: "string" }],
             outputs: [{ name: "decision_packet", type: "object" }],
+            behavior: ["Filter amendment comments using the supplied trusted_amendment_policy."],
           },
           pain_points: ["Maintainers need one decision packet instead of replaying a thread."],
           catalog_fit: {
@@ -314,6 +315,42 @@ test("evaluateSkillProposalQuality rejects supplied catalog and work-plan framin
   assert.equal(evaluation.status, "needs_review");
   assert.equal(evaluation.checks.builder_residue_free, false);
   assert.equal(evaluation.findings.some((finding) => finding.id === "supplied_decomposition"), true);
+});
+
+test("evaluateSkillProposalQuality allows ordinary supplied-as-provided contract wording", () => {
+  const evaluation = evaluateSkillProposalQuality({
+    report: {
+      execution: {
+        stdout: JSON.stringify({
+          skill_spec: {
+            skill_name: "decision-brief",
+            summary: "Read one bounded thread and return one concise maintainer decision packet.",
+            inputs: [{ name: "thread_body", type: "string" }],
+            outputs: [{ name: "decision_packet", type: "object" }],
+          },
+          pain_points: ["Maintainers need one decision packet instead of replaying a thread."],
+          catalog_fit: {
+            adjacent_entries: [
+              { name: "issue-triage", why_not_enough: "It routes work but does not emit the handoff packet." },
+            ],
+            summary: "Compared with issue-triage, this owns the decision handoff.",
+          },
+          maintainer_decisions: [
+            {
+              question: "Should the policy be required when no adapter default is supplied?",
+            },
+          ],
+          findings: [{ claim: "The source issue asks for one decision handoff." }],
+          acceptance_checks: [{ id: "ac-1" }, { id: "ac-2" }, { id: "ac-3" }],
+          harness_fixture: [{ name: "success" }],
+        }),
+      },
+    },
+    catalogEntries: ["issue-triage"],
+  });
+
+  assert.equal(evaluation.status, "pass");
+  assert.equal(evaluation.findings.some((finding) => finding.id === "supplied_decomposition"), false);
 });
 
 test("evaluateSkillProposalQuality rejects builder envelope framing", () => {
